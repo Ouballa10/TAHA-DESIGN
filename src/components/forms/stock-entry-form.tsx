@@ -17,17 +17,27 @@ import { Textarea } from "@/components/ui/textarea";
 type EntryLine = {
   key: string;
   variant_id: string;
-  quantity: number;
-  purchase_price: number;
+  quantity: string;
+  purchase_price: string;
 };
 
 function createLine(): EntryLine {
   return {
     key: crypto.randomUUID(),
     variant_id: "",
-    quantity: 1,
-    purchase_price: 0,
+    quantity: "1",
+    purchase_price: "0",
   };
+}
+
+function parseIntegerInput(value: string) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function parseDecimalInput(value: string) {
+  const parsed = Number.parseFloat(value.replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 export function StockEntryForm({
@@ -54,8 +64,8 @@ export function StockEntryForm({
       .filter((line) => line.variant_id)
       .map((line) => ({
         variant_id: line.variant_id,
-        quantity: Number(line.quantity),
-        purchase_price: mode === "in" ? Number(line.purchase_price) : null,
+        quantity: parseIntegerInput(line.quantity),
+        purchase_price: mode === "in" ? parseDecimalInput(line.purchase_price) : null,
       })),
   );
 
@@ -82,7 +92,7 @@ export function StockEntryForm({
 
             return (
               <div key={line.key} className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
-                <div className="grid gap-4 md:grid-cols-[1.5fr_0.6fr_0.7fr_auto]">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.35fr)_minmax(7.5rem,0.6fr)_minmax(8.5rem,0.7fr)_auto]">
                   <FormField label={`Article ${index + 1}`}>
                     <Select
                       value={line.variant_id}
@@ -94,7 +104,7 @@ export function StockEntryForm({
                               ? {
                                   ...entry,
                                   variant_id: event.target.value,
-                                  purchase_price: nextVariant?.purchase_price ?? 0,
+                                  purchase_price: String(nextVariant?.purchase_price ?? 0),
                                 }
                               : entry,
                           ),
@@ -114,12 +124,29 @@ export function StockEntryForm({
                     <Input
                       type="number"
                       step={1}
+                      inputMode="numeric"
+                      className="px-3"
                       value={line.quantity}
                       onChange={(event) =>
                         setLines((current) =>
                           current.map((entry) =>
+                            entry.key === line.key ? { ...entry, quantity: event.target.value } : entry,
+                          ),
+                        )
+                      }
+                      onBlur={(event) =>
+                        setLines((current) =>
+                          current.map((entry) =>
                             entry.key === line.key
-                              ? { ...entry, quantity: Number(event.target.value || 0) }
+                              ? {
+                                  ...entry,
+                                  quantity:
+                                    event.target.value.trim() === ""
+                                      ? mode === "in"
+                                        ? "1"
+                                        : "0"
+                                      : event.target.value,
+                                }
                               : entry,
                           ),
                         )
@@ -133,12 +160,25 @@ export function StockEntryForm({
                       min={0}
                       step="0.01"
                       disabled={mode !== "in"}
+                      inputMode="decimal"
+                      className="px-3"
                       value={line.purchase_price}
                       onChange={(event) =>
                         setLines((current) =>
                           current.map((entry) =>
+                            entry.key === line.key ? { ...entry, purchase_price: event.target.value } : entry,
+                          ),
+                        )
+                      }
+                      onBlur={(event) =>
+                        setLines((current) =>
+                          current.map((entry) =>
                             entry.key === line.key
-                              ? { ...entry, purchase_price: Number(event.target.value || 0) }
+                              ? {
+                                  ...entry,
+                                  purchase_price:
+                                    event.target.value.trim() === "" ? "0" : event.target.value,
+                                }
                               : entry,
                           ),
                         )
@@ -146,7 +186,7 @@ export function StockEntryForm({
                     />
                   </FormField>
 
-                  <div className="flex items-end">
+                  <div className="flex items-end md:col-span-2 xl:col-span-1">
                     <Button
                       variant="ghost"
                       className="w-full"

@@ -18,8 +18,8 @@ type SaleLine = {
   key: string;
   product_id: string;
   variant_id: string;
-  quantity: number;
-  unit_price: number;
+  quantity: string;
+  unit_price: string;
 };
 
 function createLine(): SaleLine {
@@ -27,9 +27,19 @@ function createLine(): SaleLine {
     key: crypto.randomUUID(),
     product_id: "",
     variant_id: "",
-    quantity: 1,
-    unit_price: 0,
+    quantity: "1",
+    unit_price: "0",
   };
+}
+
+function parseIntegerInput(value: string) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function parseDecimalInput(value: string) {
+  const parsed = Number.parseFloat(value.replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
@@ -81,12 +91,15 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
       .filter((line) => line.variant_id)
       .map((line) => ({
         variant_id: line.variant_id,
-        quantity: Number(line.quantity),
-        unit_price: Number(line.unit_price),
+        quantity: parseIntegerInput(line.quantity),
+        unit_price: parseDecimalInput(line.unit_price),
       })),
   );
 
-  const totalAmount = lines.reduce((sum, line) => sum + line.quantity * line.unit_price, 0);
+  const totalAmount = lines.reduce(
+    (sum, line) => sum + parseIntegerInput(line.quantity) * parseDecimalInput(line.unit_price),
+    0,
+  );
 
   return (
     <form action={formAction} className="space-y-5">
@@ -112,10 +125,11 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
           {lines.map((line, index) => {
             const selectedVariant = variantMap[line.variant_id];
             const availableVariants = line.product_id ? (variantsByProduct[line.product_id] ?? []) : [];
+            const lineQuantity = parseIntegerInput(line.quantity);
 
             return (
               <div key={line.key} className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
-                <div className="grid gap-4 md:grid-cols-[1fr_1fr_0.45fr_0.55fr_auto]">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(7.5rem,0.55fr)_minmax(8.5rem,0.75fr)_auto]">
                   <FormField label={`Produit ${index + 1}`}>
                     <Select
                       value={line.product_id}
@@ -136,7 +150,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                               ...entry,
                               product_id: nextProductId,
                               variant_id: autoVariant?.variant_id ?? "",
-                              unit_price: autoVariant?.selling_price ?? 0,
+                              unit_price: String(autoVariant?.selling_price ?? 0),
                             };
                           }),
                         );
@@ -164,7 +178,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                                   ...entry,
                                   product_id: nextVariant?.product_id ?? entry.product_id,
                                   variant_id: event.target.value,
-                                  unit_price: nextVariant?.selling_price ?? 0,
+                                  unit_price: String(nextVariant?.selling_price ?? 0),
                                 }
                               : entry,
                           ),
@@ -188,12 +202,21 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                       type="number"
                       min={1}
                       step={1}
+                      inputMode="numeric"
+                      className="px-3"
                       value={line.quantity}
                       onChange={(event) =>
                         setLines((current) =>
                           current.map((entry) =>
+                            entry.key === line.key ? { ...entry, quantity: event.target.value } : entry,
+                          ),
+                        )
+                      }
+                      onBlur={(event) =>
+                        setLines((current) =>
+                          current.map((entry) =>
                             entry.key === line.key
-                              ? { ...entry, quantity: Number(event.target.value || 1) }
+                              ? { ...entry, quantity: event.target.value.trim() === "" ? "1" : event.target.value }
                               : entry,
                           ),
                         )
@@ -206,12 +229,21 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                       type="number"
                       min={0}
                       step="0.01"
+                      inputMode="decimal"
+                      className="px-3"
                       value={line.unit_price}
                       onChange={(event) =>
                         setLines((current) =>
                           current.map((entry) =>
+                            entry.key === line.key ? { ...entry, unit_price: event.target.value } : entry,
+                          ),
+                        )
+                      }
+                      onBlur={(event) =>
+                        setLines((current) =>
+                          current.map((entry) =>
                             entry.key === line.key
-                              ? { ...entry, unit_price: Number(event.target.value || 0) }
+                              ? { ...entry, unit_price: event.target.value.trim() === "" ? "0" : event.target.value }
                               : entry,
                           ),
                         )
@@ -219,7 +251,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                     />
                   </FormField>
 
-                  <div className="flex items-end">
+                  <div className="flex items-end md:col-span-2 xl:col-span-1">
                     <Button
                       variant="ghost"
                       className="w-full"
@@ -241,7 +273,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                     <span>Details: {formatVariantLabel(selectedVariant)}</span>
                     <span>Stock dispo: {selectedVariant.quantity_in_stock}</span>
                     <span>Prix conseille: {formatCurrency(selectedVariant.selling_price)}</span>
-                    {line.quantity > selectedVariant.quantity_in_stock ? (
+                    {lineQuantity > selectedVariant.quantity_in_stock ? (
                       <span className="font-semibold text-danger">Stock insuffisant</span>
                     ) : null}
                   </div>

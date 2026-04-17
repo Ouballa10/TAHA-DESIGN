@@ -16,7 +16,7 @@ export function FormField({
   className?: string;
 }) {
   return (
-    <label className={cn("flex flex-col gap-2", className)}>
+    <label className={cn("flex min-w-0 flex-col gap-2", className)}>
       <span className="text-sm font-semibold text-foreground">{label}</span>
       {children}
       {hint ? <span className="text-xs text-muted">{hint}</span> : null}

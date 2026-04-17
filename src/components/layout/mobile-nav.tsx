@@ -1,24 +1,131 @@
-import Link from "next/link";
+"use client";
 
-import { canAccessPath, mobileNavigationItems } from "@/lib/auth/permissions";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { logoutAction } from "@/lib/actions/auth-actions";
+import { canAccessPath, navigationItems } from "@/lib/auth/permissions";
+import { SHOP_NAME } from "@/lib/config";
+import { cn } from "@/lib/utils/cn";
 import type { UserContext } from "@/types/models";
 
+function isActivePath(pathname: string, href: string) {
+  if (href === "/dashboard") {
+    return pathname === href;
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function MobileNav({ context }: { context: UserContext }) {
-  const items = mobileNavigationItems.filter((item) => canAccessPath(context, item.href));
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const { profile } = context;
+  const items = useMemo(
+    () => navigationItems.filter((item) => canAccessPath(context, item.href)),
+    [context],
+  );
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
 
   return (
-    <nav className="print-hidden fixed inset-x-3 bottom-3 z-30 rounded-3xl border border-border bg-white/92 p-2 shadow-[0_12px_30px_rgba(12,30,37,0.12)] backdrop-blur lg:hidden">
-      <div className="grid grid-cols-4 gap-1">
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="rounded-2xl px-2 py-3 text-center text-[11px] font-semibold text-foreground transition hover:bg-brand/10"
-          >
-            {item.label}
-          </Link>
-        ))}
+    <>
+      <button
+        type="button"
+        aria-controls="mobile-navigation"
+        aria-expanded={isOpen}
+        aria-label="Ouvrir le menu"
+        onClick={() => setIsOpen(true)}
+        className="inline-flex size-11 items-center justify-center rounded-2xl border border-border bg-white/90 text-foreground shadow-sm transition hover:bg-white lg:hidden"
+      >
+        <span className="flex flex-col gap-1.5">
+          <span className="block h-0.5 w-5 rounded-full bg-current" />
+          <span className="block h-0.5 w-5 rounded-full bg-current" />
+          <span className="block h-0.5 w-5 rounded-full bg-current" />
+        </span>
+      </button>
+
+      <div
+        className={cn("fixed inset-0 z-40 lg:hidden", isOpen ? "pointer-events-auto" : "pointer-events-none")}
+        aria-hidden={!isOpen}
+      >
+        <button
+          type="button"
+          aria-label="Fermer le menu"
+          onClick={() => setIsOpen(false)}
+          className={cn(
+            "absolute inset-0 bg-foreground/35 transition duration-200",
+            isOpen ? "opacity-100" : "opacity-0",
+          )}
+        />
+
+        <aside
+          id="mobile-navigation"
+          className={cn(
+            "absolute inset-0 flex flex-col bg-[#f7f2eb] px-5 py-4 shadow-[0_24px_60px_rgba(12,30,37,0.18)] transition duration-200",
+            isOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+        >
+          <div className="flex items-start justify-between gap-4 border-b border-border/70 pb-4">
+            <div className="min-w-0">
+              <p className="font-display text-xl font-semibold">{SHOP_NAME}</p>
+              <p className="mt-1 text-sm text-muted">{profile.role_label}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border bg-white px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-[#f4eee6]"
+            >
+              Fermer
+            </button>
+          </div>
+
+          <nav className="flex flex-1 flex-col overflow-y-auto py-6">
+            {items.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  "rounded-3xl px-3 py-4 transition",
+                  isActivePath(pathname, item.href)
+                    ? "bg-white/90 text-foreground shadow-sm"
+                    : "text-foreground hover:bg-white/55",
+                )}
+              >
+                <span className="block text-[1.15rem] font-semibold leading-7">{item.label}</span>
+                <span className="mt-1.5 block text-base leading-7 text-muted">{item.description}</span>
+              </Link>
+            ))}
+          </nav>
+
+          <div className="border-t border-border/70 pt-4">
+            <p className="text-sm font-semibold">{profile.full_name || profile.email}</p>
+            <p className="mt-1 text-sm text-muted">{profile.email}</p>
+            <form action={logoutAction} className="mt-4">
+              <button
+                type="submit"
+                className="inline-flex w-full justify-center rounded-2xl bg-foreground px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                Se deconnecter
+              </button>
+            </form>
+          </div>
+        </aside>
       </div>
-    </nav>
+    </>
   );
 }
