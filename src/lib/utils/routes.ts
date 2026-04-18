@@ -10,6 +10,10 @@ export function saleEditPath(saleId: string) {
   return `${saleDetailsPath(saleId)}/modifier`;
 }
 
+export function salesReportsPath() {
+  return "/rapports/ventes";
+}
+
 export function productEditPath(productId: string) {
   return `${productDetailsPath(productId)}/modifier`;
 }

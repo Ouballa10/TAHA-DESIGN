@@ -1,14 +1,21 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { requirePermission } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
 import { getSalesList } from "@/lib/data/sales";
 import { formatCurrency, formatDateTime, formatPaymentMethod, formatPaymentStatus } from "@/lib/utils/format";
+import { salesReportsPath } from "@/lib/utils/routes";
 
 export default async function SalesHistoryPage() {
-  await requirePermission("recordSale");
+  const context = await requireUser();
+
+  if (!context.permissions.recordSale) {
+    redirect("/dashboard");
+  }
+
   const sales = await getSalesList(80);
 
   return (
@@ -16,14 +23,24 @@ export default async function SalesHistoryPage() {
       <PageHeader
         eyebrow="Ventes"
         title="Historique des ventes"
-        description="Consultez les tickets saisis, les montants encaisses et les estimations de marge."
+        description="Consultez les tickets saisis, les montants encaisses et les details client."
         actions={
-          <Link
-            href="/ventes/nouvelle"
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white"
-          >
-            Nouvelle vente
-          </Link>
+          <>
+            {context.permissions.viewReports ? (
+              <Link
+                href={salesReportsPath()}
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+              >
+                Statistiques ventes
+              </Link>
+            ) : null}
+            <Link
+              href="/ventes/nouvelle"
+              className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white"
+            >
+              Nouvelle vente
+            </Link>
+          </>
         }
       />
 
@@ -53,7 +70,7 @@ export default async function SalesHistoryPage() {
               <div className="mt-4 grid gap-3 text-sm text-muted sm:grid-cols-4">
                 <span>{formatDateTime(sale.sold_at)}</span>
                 <span>Total: {formatCurrency(sale.total_amount)}</span>
-                <span>Marge estimee: {formatCurrency(sale.estimated_profit)}</span>
+                <span>{formatPaymentStatus(sale.payment_status)}</span>
                 <span>Par: {sale.created_by_name || "Systeme"}</span>
               </div>
             </Link>

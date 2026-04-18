@@ -68,7 +68,6 @@ export default async function SaleDetailsPage({
                     <p className="text-sm text-muted">{item.quantity} x {formatCurrency(item.unit_price)}</p>
                   </div>
                 </div>
-                <div className="mt-3 text-sm text-muted">Marge estimee: {formatCurrency(item.profit_amount)}</div>
               </div>
             ))}
           </CardContent>
@@ -94,10 +93,6 @@ export default async function SaleDetailsPage({
             <div className="rounded-3xl bg-[#f8f4ee] p-4">
               <p className="text-sm text-muted">Total facture</p>
               <p className="mt-2 font-display text-3xl font-semibold text-foreground">{formatCurrency(sale.total_amount)}</p>
-            </div>
-            <div className="rounded-3xl bg-[#eef5f4] p-4">
-              <p className="text-sm text-muted">Profit estime</p>
-              <p className="mt-2 font-display text-3xl font-semibold text-foreground">{formatCurrency(sale.estimated_profit)}</p>
             </div>
             <div className="text-sm text-muted">
               <p>Date: {formatDateTime(sale.sold_at)}</p>

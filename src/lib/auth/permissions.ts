@@ -1,5 +1,5 @@
 import type { RoleSlug, UserContext } from "@/types/models";
-import { adminUsersPath } from "@/lib/utils/routes";
+import { adminUsersPath, salesReportsPath } from "@/lib/utils/routes";
 
 export type PermissionKey =
   | "viewDashboard"
@@ -123,6 +123,7 @@ const pathPermissions: Array<{
   { href: "/stock/mouvements", permission: "viewStockHistory" },
   { href: "/stock/alertes", permission: "viewLowStock" },
   { href: "/ventes", permission: "recordSale" },
+  { href: salesReportsPath(), permission: "viewReports" },
   { href: adminUsersPath(), permission: "manageUsers" },
   { href: "/utilisateurs", permission: "manageUsers" },
   { href: "/profil" },
@@ -183,7 +184,12 @@ export const navigationItems = [
   {
     href: "/ventes",
     label: "Historique ventes",
-    description: "Tickets, clients et marges",
+    description: "Tickets, clients et paiements",
+  },
+  {
+    href: salesReportsPath(),
+    label: "Statistiques ventes",
+    description: "Periodes, export Excel et analyses",
   },
   {
     href: adminUsersPath(),

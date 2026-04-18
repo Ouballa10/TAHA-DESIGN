@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { requireUser } from "@/lib/auth/session";
 import { getDashboardData } from "@/lib/data/dashboard";
 import { formatCompactCurrency, formatCurrency, formatDateTime, formatPaymentStatus } from "@/lib/utils/format";
+import { salesReportsPath } from "@/lib/utils/routes";
 
 export default async function DashboardPage() {
   const context = await requireUser();
@@ -23,10 +24,10 @@ export default async function DashboardPage() {
           <>
             {context.permissions.viewReports ? (
               <Link
-                href="/api/reports/sales?days=30"
+                href={salesReportsPath()}
                 className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-white/80"
               >
-                Export CSV
+                Statistiques ventes
               </Link>
             ) : null}
             <Link
