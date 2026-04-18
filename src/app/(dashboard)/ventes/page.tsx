@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { getSalesList } from "@/lib/data/sales";
-import { formatCurrency, formatDateTime } from "@/lib/utils/format";
+import { formatCurrency, formatDateTime, formatPaymentMethod, formatPaymentStatus } from "@/lib/utils/format";
 
 export default async function SalesHistoryPage() {
   await requirePermission("recordSale");
@@ -45,9 +45,9 @@ export default async function SalesHistoryPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Badge tone={sale.payment_status === "paid" ? "success" : "warning"}>
-                    {sale.payment_status}
+                    {formatPaymentStatus(sale.payment_status)}
                   </Badge>
-                  <Badge tone="brand">{sale.payment_method}</Badge>
+                  <Badge tone="brand">{formatPaymentMethod(sale.payment_method)}</Badge>
                 </div>
               </div>
               <div className="mt-4 grid gap-3 text-sm text-muted sm:grid-cols-4">

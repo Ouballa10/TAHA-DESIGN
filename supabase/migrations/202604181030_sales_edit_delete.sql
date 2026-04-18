@@ -1,0 +1,318 @@
+begin;
+
+create or replace function public.update_sale(
+  p_sale_id uuid,
+  p_customer_name text default null,
+  p_customer_phone text default null,
+  p_payment_status text default 'paid',
+  p_payment_method text default 'cash',
+  p_note text default null,
+  p_sold_at timestamptz default timezone('utc', now()),
+  p_items jsonb default '[]'::jsonb
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_sale record;
+  v_existing_item record;
+  v_item jsonb;
+  v_variant record;
+  v_quantity integer;
+  v_unit_price numeric(12, 2);
+  v_line_total numeric(12, 2);
+  v_line_profit numeric(12, 2);
+  v_subtotal numeric(12, 2) := 0;
+  v_profit numeric(12, 2) := 0;
+  v_label text;
+  v_existing_items_json jsonb := '[]'::jsonb;
+  v_requested_items_json jsonb := '[]'::jsonb;
+  v_items_changed boolean := false;
+  v_restore_note text;
+  v_apply_note text;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentification requise';
+  end if;
+
+  if not public.has_any_role(array['admin', 'worker']) then
+    raise exception 'Modification de vente non autorisee';
+  end if;
+
+  if p_sale_id is null then
+    raise exception 'Vente manquante';
+  end if;
+
+  if jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
+    raise exception 'Aucune ligne de vente transmise';
+  end if;
+
+  if coalesce(p_payment_status, 'paid') not in ('paid', 'partial', 'pending') then
+    raise exception 'Statut de paiement invalide';
+  end if;
+
+  select
+    s.id,
+    s.sale_number
+  into v_sale
+  from public.sales s
+  where s.id = p_sale_id
+  for update;
+
+  if not found then
+    raise exception 'Vente introuvable';
+  end if;
+
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'variant_id', si.variant_id,
+        'quantity', si.quantity,
+        'unit_price', si.unit_price
+      )
+      order by si.variant_id::text, si.quantity, si.unit_price
+    ),
+    '[]'::jsonb
+  )
+  into v_existing_items_json
+  from public.sale_items si
+  where si.sale_id = p_sale_id;
+
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'variant_id', (item.value ->> 'variant_id')::uuid,
+        'quantity', coalesce((item.value ->> 'quantity')::integer, 0),
+        'unit_price', greatest(coalesce((item.value ->> 'unit_price')::numeric, 0), 0)
+      )
+      order by
+        item.value ->> 'variant_id',
+        coalesce((item.value ->> 'quantity')::integer, 0),
+        greatest(coalesce((item.value ->> 'unit_price')::numeric, 0), 0)
+    ),
+    '[]'::jsonb
+  )
+  into v_requested_items_json
+  from jsonb_array_elements(p_items) as item(value);
+
+  v_items_changed := v_existing_items_json is distinct from v_requested_items_json;
+
+  if not v_items_changed then
+    update public.sales
+    set
+      customer_name = nullif(trim(coalesce(p_customer_name, '')), ''),
+      customer_phone = nullif(trim(coalesce(p_customer_phone, '')), ''),
+      payment_status = coalesce(p_payment_status, 'paid'),
+      payment_method = coalesce(p_payment_method, 'cash'),
+      note = nullif(trim(coalesce(p_note, '')), ''),
+      sold_at = coalesce(p_sold_at, sold_at),
+      updated_at = timezone('utc', now())
+    where id = p_sale_id;
+
+    return p_sale_id;
+  end if;
+
+  v_restore_note := coalesce(
+    nullif(trim(coalesce(p_note, '')), ''),
+    format('Correction de la vente %s', v_sale.sale_number)
+  );
+  v_apply_note := coalesce(
+    nullif(trim(coalesce(p_note, '')), ''),
+    format('Vente %s modifiee', v_sale.sale_number)
+  );
+
+  perform set_config('app.allow_purchase_stock_in', 'true', true);
+  perform set_config('app.allow_sale_stock_out', 'true', true);
+
+  for v_existing_item in
+    select
+      si.variant_id,
+      si.quantity
+    from public.sale_items si
+    where si.sale_id = p_sale_id
+      and si.variant_id is not null
+    order by si.created_at asc, si.id asc
+  loop
+    perform public.record_stock_movement(
+      v_existing_item.variant_id,
+      'in',
+      v_existing_item.quantity,
+      v_restore_note,
+      'sale_restore',
+      p_sale_id,
+      timezone('utc', now())
+    );
+  end loop;
+
+  delete from public.sale_items
+  where sale_id = p_sale_id;
+
+  for v_item in
+    select value from jsonb_array_elements(p_items)
+  loop
+    select
+      pv.id,
+      pv.reference,
+      pv.quantity_in_stock,
+      pv.type,
+      pv.color,
+      pv.size,
+      pv.purchase_price,
+      pv.selling_price,
+      p.name as product_name
+    into v_variant
+    from public.product_variants pv
+    join public.products p on p.id = pv.product_id
+    where pv.id = (v_item ->> 'variant_id')::uuid
+    for update;
+
+    if not found then
+      raise exception 'Variant introuvable pendant la mise a jour';
+    end if;
+
+    v_quantity := coalesce((v_item ->> 'quantity')::integer, 0);
+    v_unit_price := coalesce((v_item ->> 'unit_price')::numeric, v_variant.selling_price, 0);
+
+    if v_quantity <= 0 then
+      raise exception 'Quantite de vente invalide';
+    end if;
+
+    if v_variant.quantity_in_stock < v_quantity then
+      raise exception 'Stock insuffisant pour %', v_variant.reference;
+    end if;
+
+    v_line_total := v_quantity * greatest(v_unit_price, 0);
+    v_line_profit := v_quantity * (greatest(v_unit_price, 0) - greatest(v_variant.purchase_price, 0));
+    v_label := coalesce(nullif(concat_ws(' / ', v_variant.type, v_variant.color, v_variant.size), ''), 'Variant simple');
+
+    insert into public.sale_items (
+      sale_id,
+      variant_id,
+      product_name_snapshot,
+      variant_label_snapshot,
+      reference_snapshot,
+      quantity,
+      unit_price,
+      purchase_price_snapshot,
+      line_total,
+      profit_amount
+    )
+    values (
+      p_sale_id,
+      v_variant.id,
+      v_variant.product_name,
+      v_label,
+      v_variant.reference,
+      v_quantity,
+      greatest(v_unit_price, 0),
+      greatest(v_variant.purchase_price, 0),
+      v_line_total,
+      v_line_profit
+    );
+
+    perform public.record_stock_movement(
+      v_variant.id,
+      'out',
+      v_quantity,
+      v_apply_note,
+      'sale',
+      p_sale_id,
+      timezone('utc', now())
+    );
+
+    v_subtotal := v_subtotal + v_line_total;
+    v_profit := v_profit + v_line_profit;
+  end loop;
+
+  update public.sales
+  set
+    customer_name = nullif(trim(coalesce(p_customer_name, '')), ''),
+    customer_phone = nullif(trim(coalesce(p_customer_phone, '')), ''),
+    payment_status = coalesce(p_payment_status, 'paid'),
+    payment_method = coalesce(p_payment_method, 'cash'),
+    note = nullif(trim(coalesce(p_note, '')), ''),
+    sold_at = coalesce(p_sold_at, sold_at),
+    subtotal = v_subtotal,
+    total_amount = v_subtotal,
+    estimated_profit = v_profit,
+    updated_at = timezone('utc', now())
+  where id = p_sale_id;
+
+  return p_sale_id;
+end;
+$$;
+
+create or replace function public.delete_sale(
+  p_sale_id uuid
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_sale record;
+  v_existing_item record;
+  v_restore_note text;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentification requise';
+  end if;
+
+  if not public.has_any_role(array['admin', 'worker']) then
+    raise exception 'Suppression de vente non autorisee';
+  end if;
+
+  if p_sale_id is null then
+    raise exception 'Vente manquante';
+  end if;
+
+  select
+    s.id,
+    s.sale_number
+  into v_sale
+  from public.sales s
+  where s.id = p_sale_id
+  for update;
+
+  if not found then
+    raise exception 'Vente introuvable';
+  end if;
+
+  v_restore_note := format('Suppression de la vente %s', v_sale.sale_number);
+
+  perform set_config('app.allow_purchase_stock_in', 'true', true);
+
+  for v_existing_item in
+    select
+      si.variant_id,
+      si.quantity
+    from public.sale_items si
+    where si.sale_id = p_sale_id
+      and si.variant_id is not null
+    order by si.created_at asc, si.id asc
+  loop
+    perform public.record_stock_movement(
+      v_existing_item.variant_id,
+      'in',
+      v_existing_item.quantity,
+      v_restore_note,
+      'sale_delete',
+      p_sale_id,
+      timezone('utc', now())
+    );
+  end loop;
+
+  delete from public.sales
+  where id = p_sale_id;
+
+  return p_sale_id;
+end;
+$$;
+
+grant execute on function public.update_sale(uuid, text, text, text, text, text, timestamptz, jsonb) to authenticated;
+grant execute on function public.delete_sale(uuid) to authenticated;
+
+commit;

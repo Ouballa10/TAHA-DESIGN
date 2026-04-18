@@ -2,6 +2,14 @@ export function productDetailsPath(productId: string) {
   return `/produits/${productId}`;
 }
 
+export function saleDetailsPath(saleId: string) {
+  return `/ventes/${saleId}`;
+}
+
+export function saleEditPath(saleId: string) {
+  return `${saleDetailsPath(saleId)}/modifier`;
+}
+
 export function productEditPath(productId: string) {
   return `${productDetailsPath(productId)}/modifier`;
 }

@@ -68,3 +68,24 @@ export function formatVariantLabel(input: {
 }) {
   return [input.type, input.color, input.size].filter(Boolean).join(" / ") || "Variant simple";
 }
+
+export function formatPaymentStatus(value: string) {
+  const labels: Record<string, string> = {
+    paid: "Paye",
+    partial: "Partiel",
+    pending: "En attente",
+  };
+
+  return labels[value] ?? value;
+}
+
+export function formatPaymentMethod(value: string) {
+  const labels: Record<string, string> = {
+    cash: "Especes",
+    card: "Carte",
+    transfer: "Virement",
+    other: "Autre",
+  };
+
+  return labels[value] ?? value;
+}

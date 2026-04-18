@@ -2,11 +2,11 @@
 
 import { useActionState, useMemo, useState } from "react";
 
-import { createSaleAction } from "@/lib/actions/sales-actions";
+import { createSaleAction, updateSaleAction } from "@/lib/actions/sales-actions";
 import { formatCurrency, formatVariantLabel } from "@/lib/utils/format";
 import { useActionToast } from "@/lib/utils/use-action-toast";
 import { initialActionState } from "@/types/actions";
-import type { VariantCatalogItem } from "@/types/models";
+import type { SaleDetail, VariantCatalogItem } from "@/types/models";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,24 @@ function createLine(): SaleLine {
   };
 }
 
+function createInitialLines(sale: SaleDetail | undefined, variants: VariantCatalogItem[]) {
+  if (!sale || sale.items.length === 0) {
+    return [createLine()];
+  }
+
+  return sale.items.map((item) => {
+    const matchedVariant = item.variant_id ? variants.find((variant) => variant.variant_id === item.variant_id) : null;
+
+    return {
+      key: crypto.randomUUID(),
+      product_id: matchedVariant?.product_id ?? "",
+      variant_id: matchedVariant?.variant_id ?? "",
+      quantity: String(item.quantity),
+      unit_price: String(item.unit_price),
+    };
+  });
+}
+
 function parseIntegerInput(value: string) {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -42,9 +60,39 @@ function parseDecimalInput(value: string) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
-  const [state, formAction] = useActionState(createSaleAction, initialActionState);
-  const [lines, setLines] = useState<SaleLine[]>([createLine()]);
+function updateLineField(
+  lines: SaleLine[],
+  key: string,
+  patch: Partial<SaleLine>,
+) {
+  return lines.map((entry) => (entry.key === key ? { ...entry, ...patch } : entry));
+}
+
+function toDateTimeLocalValue(value?: string | null) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+export function SaleForm({
+  variants,
+  sale,
+}: {
+  variants: VariantCatalogItem[];
+  sale?: SaleDetail;
+}) {
+  const action = sale ? updateSaleAction : createSaleAction;
+  const [state, formAction] = useActionState(action, initialActionState);
+  const [lines, setLines] = useState<SaleLine[]>(() => createInitialLines(sale, variants));
   useActionToast(state);
 
   const variantMap = useMemo(
@@ -85,6 +133,13 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
 
     return Array.from(productMap.values()).sort((left, right) => left.name.localeCompare(right.name, "fr"));
   }, [variants]);
+  const missingVariantCount = useMemo(() => {
+    if (!sale) {
+      return 0;
+    }
+
+    return sale.items.filter((item) => !item.variant_id || !variantMap[item.variant_id]).length;
+  }, [sale, variantMap]);
 
   const itemsJson = JSON.stringify(
     lines
@@ -103,6 +158,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
 
   return (
     <form action={formAction} className="space-y-5">
+      {sale ? <input type="hidden" name="id" value={sale.id} /> : null}
       <input type="hidden" name="items_json" value={itemsJson} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
@@ -112,12 +168,25 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
             plusieurs. Pour un produit simple, sa reference unique sera proposee automatiquement.
           </div>
 
-          <div className="flex items-center justify-between">
+          {missingVariantCount > 0 ? (
+            <div className="rounded-3xl border border-accent/30 bg-[#fff6eb] p-4 text-sm leading-6 text-foreground">
+              {missingVariantCount} ligne{missingVariantCount > 1 ? "s" : ""} de cette vente pointe
+              {missingVariantCount > 1 ? "nt" : ""} vers une reference inactive ou supprimee. Choisissez une nouvelle
+              reference avant d&apos;enregistrer.
+            </div>
+          ) : null}
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-display text-xl font-semibold">Articles vendus</p>
               <p className="text-sm text-muted">Selection par produit, puis par reference exacte.</p>
             </div>
-            <Button variant="secondary" onClick={() => setLines((current) => [...current, createLine()])}>
+            <Button
+              type="button"
+              variant="secondary"
+              className="sm:self-auto"
+              onClick={() => setLines((current) => [...current, createLine()])}
+            >
               Ajouter une ligne
             </Button>
           </div>
@@ -129,7 +198,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
 
             return (
               <div key={line.key} className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(7.5rem,0.55fr)_minmax(8.5rem,0.75fr)_auto]">
+                <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(7rem,0.5fr)_minmax(8rem,0.7fr)_auto]">
                   <FormField label={`Produit ${index + 1}`}>
                     <Select
                       value={line.product_id}
@@ -205,22 +274,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                       inputMode="numeric"
                       className="px-3"
                       value={line.quantity}
-                      onChange={(event) =>
-                        setLines((current) =>
-                          current.map((entry) =>
-                            entry.key === line.key ? { ...entry, quantity: event.target.value } : entry,
-                          ),
-                        )
-                      }
-                      onBlur={(event) =>
-                        setLines((current) =>
-                          current.map((entry) =>
-                            entry.key === line.key
-                              ? { ...entry, quantity: event.target.value.trim() === "" ? "1" : event.target.value }
-                              : entry,
-                          ),
-                        )
-                      }
+                      onChange={(event) => setLines((current) => updateLineField(current, line.key, { quantity: event.target.value }))}
                     />
                   </FormField>
 
@@ -232,29 +286,15 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                       inputMode="decimal"
                       className="px-3"
                       value={line.unit_price}
-                      onChange={(event) =>
-                        setLines((current) =>
-                          current.map((entry) =>
-                            entry.key === line.key ? { ...entry, unit_price: event.target.value } : entry,
-                          ),
-                        )
-                      }
-                      onBlur={(event) =>
-                        setLines((current) =>
-                          current.map((entry) =>
-                            entry.key === line.key
-                              ? { ...entry, unit_price: event.target.value.trim() === "" ? "0" : event.target.value }
-                              : entry,
-                          ),
-                        )
-                      }
+                      onChange={(event) => setLines((current) => updateLineField(current, line.key, { unit_price: event.target.value }))}
                     />
                   </FormField>
 
-                  <div className="flex items-end md:col-span-2 xl:col-span-1">
+                  <div className="flex items-end md:col-span-2 2xl:col-span-1">
                     <Button
+                      type="button"
                       variant="ghost"
-                      className="w-full"
+                      className="w-full 2xl:min-w-[7.5rem]"
                       onClick={() =>
                         setLines((current) =>
                           current.length === 1 ? [createLine()] : current.filter((entry) => entry.key !== line.key),
@@ -267,7 +307,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
                 </div>
 
                 {selectedVariant ? (
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
+                  <div className="mt-4 grid gap-2 text-xs text-muted sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
                     <span>Produit: {selectedVariant.product_name}</span>
                     <span>Reference: {selectedVariant.reference}</span>
                     <span>Details: {formatVariantLabel(selectedVariant)}</span>
@@ -293,15 +333,15 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
 
         <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
           <FormField label="Nom du client">
-            <Input name="customer_name" placeholder="Optionnel" />
+            <Input name="customer_name" placeholder="Optionnel" defaultValue={sale?.customer_name ?? ""} />
           </FormField>
 
           <FormField label="Telephone du client">
-            <Input name="customer_phone" type="tel" placeholder="Optionnel" />
+            <Input name="customer_phone" type="tel" placeholder="Optionnel" defaultValue={sale?.customer_phone ?? ""} />
           </FormField>
 
           <FormField label="Statut paiement">
-            <Select name="payment_status" defaultValue="paid">
+            <Select name="payment_status" defaultValue={sale?.payment_status ?? "paid"}>
               <option value="paid">Paye</option>
               <option value="partial">Partiel</option>
               <option value="pending">En attente</option>
@@ -309,7 +349,7 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
           </FormField>
 
           <FormField label="Mode de paiement">
-            <Select name="payment_method" defaultValue="cash">
+            <Select name="payment_method" defaultValue={sale?.payment_method ?? "cash"}>
               <option value="cash">Especes</option>
               <option value="card">Carte</option>
               <option value="transfer">Virement</option>
@@ -318,11 +358,11 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
           </FormField>
 
           <FormField label="Date de vente">
-            <Input name="sold_at" type="datetime-local" />
+            <Input name="sold_at" type="datetime-local" defaultValue={toDateTimeLocalValue(sale?.sold_at)} />
           </FormField>
 
           <FormField label="Note">
-            <Textarea name="note" placeholder="Remarque interne ou client." />
+            <Textarea name="note" placeholder="Remarque interne ou client." defaultValue={sale?.note ?? ""} />
           </FormField>
 
           <div className="rounded-3xl bg-[#f8f4ee] p-4">
@@ -334,7 +374,12 @@ export function SaleForm({ variants }: { variants: VariantCatalogItem[] }) {
             <div className="rounded-2xl bg-danger/10 px-4 py-3 text-sm text-danger">{state.error}</div>
           ) : null}
 
-          <SubmitButton className="w-full">Valider la vente</SubmitButton>
+          <SubmitButton
+            className="w-full"
+            pendingLabel={sale ? "Mise a jour de la vente..." : "Validation de la vente..."}
+          >
+            {sale ? "Enregistrer les modifications" : "Valider la vente"}
+          </SubmitButton>
         </div>
       </div>
     </form>

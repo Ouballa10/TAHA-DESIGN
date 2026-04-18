@@ -1,21 +1,25 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { DeleteSaleForm } from "@/components/forms/delete-sale-form";
 import { PrintButton } from "@/components/ui/print-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { getSaleById } from "@/lib/data/sales";
-import { formatCurrency, formatDateTime } from "@/lib/utils/format";
+import { formatCurrency, formatDateTime, formatPaymentMethod, formatPaymentStatus } from "@/lib/utils/format";
+import { saleEditPath } from "@/lib/utils/routes";
 
 export default async function SaleDetailsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePermission("recordSale");
+  const context = await requirePermission("recordSale");
   const { id } = await params;
   const sale = await getSaleById(id);
+  const canManageSale = context.profile.role === "admin" || context.profile.role === "worker";
 
   if (!sale) {
     notFound();
@@ -27,7 +31,20 @@ export default async function SaleDetailsPage({
         eyebrow="Ticket"
         title={sale.sale_number}
         description={`Vente du ${formatDateTime(sale.sold_at)}`}
-        actions={<PrintButton />}
+        actions={
+          <>
+            {canManageSale ? (
+              <Link
+                href={saleEditPath(sale.id)}
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+              >
+                Modifier
+              </Link>
+            ) : null}
+            {canManageSale ? <DeleteSaleForm id={sale.id} saleNumber={sale.sale_number} /> : null}
+            <PrintButton />
+          </>
+        }
       />
 
       <div className="grid gap-5 xl:grid-cols-[1fr_0.8fr]">
@@ -65,9 +82,9 @@ export default async function SaleDetailsPage({
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Badge tone={sale.payment_status === "paid" ? "success" : "warning"}>
-                {sale.payment_status}
+                {formatPaymentStatus(sale.payment_status)}
               </Badge>
-              <Badge tone="brand">{sale.payment_method}</Badge>
+              <Badge tone="brand">{formatPaymentMethod(sale.payment_method)}</Badge>
             </div>
             <div className="rounded-3xl bg-[#f8f4ee] p-4">
               <p className="text-sm text-muted">Client</p>

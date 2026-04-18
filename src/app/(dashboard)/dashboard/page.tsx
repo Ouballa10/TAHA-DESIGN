@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireUser } from "@/lib/auth/session";
 import { getDashboardData } from "@/lib/data/dashboard";
-import { formatCompactCurrency, formatCurrency, formatDateTime } from "@/lib/utils/format";
+import { formatCompactCurrency, formatCurrency, formatDateTime, formatPaymentStatus } from "@/lib/utils/format";
 
 export default async function DashboardPage() {
   const context = await requireUser();
@@ -133,7 +133,7 @@ export default async function DashboardPage() {
                       <p className="text-sm text-muted">{sale.customer_name || "Client comptoir"}</p>
                     </div>
                     <Badge tone={sale.payment_status === "paid" ? "success" : "warning"}>
-                      {sale.payment_status}
+                      {formatPaymentStatus(sale.payment_status)}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm">
