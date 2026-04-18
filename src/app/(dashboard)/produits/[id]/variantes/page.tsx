@@ -106,7 +106,7 @@ export default async function VariantsManagementPage({
                   >
                     Modifier
                   </Link>
-                  {context.profile.role === "admin" ? (
+                  {context.permissions.manageCatalog ? (
                     <DeleteVariantForm id={variant.id} productId={product.id} reference={variant.reference} />
                   ) : null}
                 </div>

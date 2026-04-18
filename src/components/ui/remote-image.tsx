@@ -21,6 +21,7 @@ export function RemoteImage({
       alt={alt}
       width={1200}
       height={900}
+      unoptimized
       sizes={sizes}
       priority={priority}
       className={cn("h-full w-full object-cover", className)}

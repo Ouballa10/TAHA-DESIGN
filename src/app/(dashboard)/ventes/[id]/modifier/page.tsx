@@ -12,7 +12,7 @@ export default async function EditSalePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireRole(["admin", "worker"]);
+  await requireRole(["worker"]);
   const { id } = await params;
   const [sale, variants] = await Promise.all([getSaleById(id), getVariantCatalog(120)]);
 

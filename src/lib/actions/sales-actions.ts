@@ -155,7 +155,7 @@ export async function updateSaleAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireRole(["admin", "worker"]);
+  await requireRole(["worker"]);
   const supabase = await createServerSupabaseClient();
   const saleId = String(formData.get("id") ?? "").trim();
 
@@ -202,7 +202,7 @@ export async function deleteSaleAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireRole(["admin", "worker"]);
+  await requireRole(["worker"]);
   const supabase = await createServerSupabaseClient();
   const saleId = String(formData.get("id") ?? "").trim();
 

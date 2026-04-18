@@ -46,7 +46,7 @@ export default async function CategoriesPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <CategoryForm category={category} submitLabel="Mettre a jour" />
-                      {context.profile.role === "admin" ? (
+                      {context.permissions.manageCategories ? (
                         <DeleteCategoryForm id={category.id} name={category.name} />
                       ) : null}
                     </div>

@@ -112,7 +112,7 @@ export async function deleteCategoryAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireRole(["admin"]);
+  await requireRole(["admin", "manager"]);
   const supabase = await createServerSupabaseClient();
   const id = normalizeOptionalString(formData.get("id"));
 
@@ -221,7 +221,7 @@ export async function deleteProductAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireRole(["admin"]);
+  await requireRole(["admin", "manager"]);
   const supabase = await createServerSupabaseClient();
   const id = normalizeOptionalString(formData.get("id"));
 
@@ -397,7 +397,7 @@ export async function deleteVariantAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireRole(["admin"]);
+  await requireRole(["admin", "manager"]);
   const supabase = await createServerSupabaseClient();
   const id = normalizeOptionalString(formData.get("id"));
   const productId = normalizeOptionalString(formData.get("product_id"));

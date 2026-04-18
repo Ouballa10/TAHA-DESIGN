@@ -63,7 +63,7 @@ export default async function ProductDetailsPage({
               >
                 Voir les references
               </Link>
-              {context.profile.role === "admin" ? (
+              {context.permissions.manageCatalog ? (
                 <DeleteProductForm id={product.id} name={product.name} />
               ) : null}
             </>
