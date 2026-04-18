@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ export default async function DashboardPage() {
         description="Les informations essentielles pour savoir ce qui est en stock, ce qui se vend et ce qui doit etre reapprovisionne."
         actions={
           <>
+            <InstallAppButton />
             {context.permissions.viewReports ? (
               <Link
                 href={salesReportsPath()}

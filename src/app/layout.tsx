@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Manrope, Space_Grotesk } from "next/font/google";
 
 import "@/app/globals.css";
+import { PwaRegister } from "@/components/pwa/pwa-register";
 import { ToasterProvider } from "@/components/ui/toaster-provider";
 import { SHOP_NAME } from "@/lib/config";
 
@@ -22,13 +23,24 @@ export const metadata: Metadata = {
   title: `${SHOP_NAME} | Gestion de stock`,
   description: "Application de gestion de stock, ventes et achats pour une petite quincaillerie ou magasin de materiaux.",
   applicationName: `${SHOP_NAME} Stock`,
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: SHOP_NAME,
   },
+  icons: {
+    icon: [
+      { url: "/pwa/icon-192", sizes: "192x192", type: "image/png" },
+      { url: "/pwa/icon-512", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/pwa/apple-touch-icon", sizes: "180x180", type: "image/png" }],
+  },
   formatDetection: {
     telephone: false,
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
   },
 };
 
@@ -49,6 +61,7 @@ export default function RootLayout({
     <html lang="fr" className={`${manrope.variable} ${spaceGrotesk.variable}`}>
       <body>
         {children}
+        <PwaRegister />
         <ToasterProvider />
       </body>
     </html>
