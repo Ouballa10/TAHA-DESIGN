@@ -19,7 +19,7 @@ export default async function SaleDetailsPage({
   const context = await requirePermission("recordSale");
   const { id } = await params;
   const sale = await getSaleById(id);
-  const canManageSale = context.profile.role === "worker";
+  const canManageSale = context.profile.role === "admin" || context.profile.role === "manager";
 
   if (!sale) {
     notFound();
