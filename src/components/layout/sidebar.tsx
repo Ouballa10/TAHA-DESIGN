@@ -16,9 +16,6 @@ export function Sidebar({ context }: { context: UserContext }) {
         <p className="mt-1 text-sm text-muted">Gestion stock, ventes et achats</p>
         <div className="mt-4 flex items-center gap-2">
           <Badge tone={getRoleBadgeTone(profile.role)}>{profile.role_label}</Badge>
-          <Badge tone={profile.is_active ? "success" : "danger"}>{profile.is_active ? "Actif" : "Inactif"}</Badge>
-          {profile.can_record_stock_entries ? <Badge tone="success">Entrees autorisees</Badge> : null}
-          {profile.can_adjust_stock ? <Badge tone="warning">Corrections autorisees</Badge> : null}
         </div>
       </div>
 

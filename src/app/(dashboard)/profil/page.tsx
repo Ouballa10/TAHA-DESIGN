@@ -30,9 +30,6 @@ export default async function ProfilePage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge tone="brand">{context.profile.role_label}</Badge>
-              {context.permissions.createStockEntry ? <Badge tone="success">Entrees</Badge> : null}
-              {context.permissions.adjustStock ? <Badge tone="warning">Corrections</Badge> : null}
-              {context.permissions.manageUsers ? <Badge tone="danger">Administration</Badge> : null}
             </div>
           </CardContent>
         </Card>
