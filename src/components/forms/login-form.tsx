@@ -16,7 +16,7 @@ export function LoginForm() {
   return (
     <form action={formAction} className="space-y-5">
       <FormField label="Adresse email">
-        <Input name="email" type="email" placeholder="admin@tahadesign.ma" required />
+        <Input name="email" type="email" placeholder="Votre adresse email" required />
       </FormField>
 
       <FormField label="Mot de passe">

@@ -30,11 +30,8 @@ export const metadata: Metadata = {
     title: SHOP_NAME,
   },
   icons: {
-    icon: [
-      { url: "/pwa/icon-192", sizes: "192x192", type: "image/png" },
-      { url: "/pwa/icon-512", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/pwa/apple-touch-icon", sizes: "180x180", type: "image/png" }],
+    icon: [{ url: "/icon.png", sizes: "512x512", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", sizes: "192x192", type: "image/png" }],
   },
   formatDetection: {
     telephone: false,

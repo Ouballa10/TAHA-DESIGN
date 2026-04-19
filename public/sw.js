@@ -1,12 +1,10 @@
-const CACHE_VERSION = "taha-design-pwa-v1";
+const CACHE_VERSION = "taha-design-pwa-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const STATIC_ASSETS = [
   "/offline.html",
   "/manifest.webmanifest",
-  "/pwa/icon-192",
-  "/pwa/icon-512",
-  "/pwa/icon-maskable-512",
-  "/pwa/apple-touch-icon",
+  "/icon.png",
+  "/apple-icon.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -51,10 +49,9 @@ self.addEventListener("fetch", (event) => {
 
   const isStaticAsset =
     url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/pwa/") ||
     url.pathname === "/manifest.webmanifest" ||
-    url.pathname === "/icon.svg" ||
-    url.pathname === "/apple-icon.svg";
+    url.pathname === "/icon.png" ||
+    url.pathname === "/apple-icon.png";
 
   if (!isStaticAsset) {
     return;

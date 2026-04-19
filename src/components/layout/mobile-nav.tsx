@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
@@ -19,8 +19,13 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function subscribeToClientReady() {
+  return () => {};
+}
+
 export function MobileNav({ context }: { context: UserContext }) {
   const [isOpen, setIsOpen] = useState(false);
+  const isMounted = useSyncExternalStore(subscribeToClientReady, () => true, () => false);
   const pathname = usePathname();
   const { profile } = context;
   const items = useMemo(
@@ -137,7 +142,7 @@ export function MobileNav({ context }: { context: UserContext }) {
           <span className="block h-0.5 w-5 rounded-full bg-current" />
         </span>
       </button>
-      {typeof document !== "undefined" ? createPortal(overlay, document.body) : null}
+      {isMounted ? createPortal(overlay, document.body) : null}
     </>
   );
 }

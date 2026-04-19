@@ -18,20 +18,14 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["business", "productivity", "shopping"],
     icons: [
       {
-        src: "/pwa/icon-192",
+        src: "/apple-icon.png",
         sizes: "192x192",
         type: "image/png",
       },
       {
-        src: "/pwa/icon-512",
+        src: "/icon.png",
         sizes: "512x512",
         type: "image/png",
-      },
-      {
-        src: "/pwa/icon-maskable-512",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable",
       },
     ],
     shortcuts: [
@@ -40,14 +34,14 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: "Vente",
         description: "Saisir rapidement une nouvelle vente.",
         url: "/ventes/nouvelle",
-        icons: [{ src: "/pwa/icon-192", sizes: "192x192", type: "image/png" }],
+        icons: [{ src: "/apple-icon.png", sizes: "192x192", type: "image/png" }],
       },
       {
         name: "Recherche rapide",
         short_name: "Recherche",
         description: "Trouver un produit ou une reference.",
         url: "/recherche",
-        icons: [{ src: "/pwa/icon-192", sizes: "192x192", type: "image/png" }],
+        icons: [{ src: "/apple-icon.png", sizes: "192x192", type: "image/png" }],
       },
     ],
   };
