@@ -1,12 +1,36 @@
 import "server-only";
 
+import { unstable_noStore as noStore } from "next/cache";
+
 import { getRoleLabel } from "@/lib/auth/permissions";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { ManagedUser, RoleSlug, ShopSettings } from "@/types/models";
 
 function toRoleSlug(input: unknown): RoleSlug {
   return input === "admin" || input === "manager" || input === "worker" ? input : "worker";
 }
+
+const shopSettingsSelect = [
+  "id",
+  "shop_name",
+  "company_tagline",
+  "phone",
+  "company_email",
+  "website_url",
+  "legal_identifier",
+  "address",
+  "logo_path",
+  "currency",
+  "low_stock_global_threshold",
+  "allow_worker_price_visibility",
+  "invoice_footer",
+  "invoice_prefix",
+  "show_tax_on_invoice",
+  "tax_rate",
+  "seo_title",
+  "seo_description",
+].join(", ");
 
 export async function getUsers(): Promise<ManagedUser[]> {
   const supabase = await createServerSupabaseClient();
@@ -65,11 +89,26 @@ export async function getShopSettings(): Promise<ShopSettings | null> {
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("shop_settings")
-    .select(
-      "id, shop_name, phone, address, currency, low_stock_global_threshold, allow_worker_price_visibility, invoice_footer",
-    )
+    .select(shopSettingsSelect)
     .limit(1)
     .maybeSingle();
 
   return (data ?? null) as ShopSettings | null;
+}
+
+export async function getPublicShopSettings(): Promise<ShopSettings | null> {
+  noStore();
+
+  try {
+    const supabase = createAdminSupabaseClient();
+    const { data } = await supabase
+      .from("shop_settings")
+      .select(shopSettingsSelect)
+      .limit(1)
+      .maybeSingle();
+
+    return (data ?? null) as ShopSettings | null;
+  } catch {
+    return null;
+  }
 }

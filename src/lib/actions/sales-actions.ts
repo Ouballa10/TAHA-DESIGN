@@ -23,6 +23,10 @@ const saleMetaSchema = z.object({
   payment_method: z.enum(["cash", "card", "transfer", "other"]).default("cash"),
   note: z.string().trim().max(1000).optional(),
   sold_at: z.string().trim().optional(),
+  invoice_requested: z.boolean().default(false),
+  apply_tax: z.boolean().default(false),
+  tax_rate: z.number().min(0, "TVA invalide.").max(100, "TVA invalide.").default(0),
+  customer_ice: z.string().trim().max(60).optional(),
 });
 
 function parseSaleItems(formData: FormData) {
@@ -75,6 +79,10 @@ function parseSalePayload(
     payment_method: String(formData.get("payment_method") ?? "cash"),
     note: String(formData.get("note") ?? ""),
     sold_at: String(formData.get("sold_at") ?? ""),
+    invoice_requested: formData.get("invoice_requested") === "on",
+    apply_tax: formData.get("apply_tax") === "on",
+    tax_rate: Number(formData.get("tax_rate") ?? 0),
+    customer_ice: String(formData.get("customer_ice") ?? ""),
   });
 
   if (!parsedMeta.success) {
@@ -87,6 +95,10 @@ function parseSalePayload(
     };
   }
 
+  const invoiceRequested = parsedMeta.data.invoice_requested;
+  const applyTax = invoiceRequested && parsedMeta.data.apply_tax && parsedMeta.data.tax_rate > 0;
+  const taxRate = applyTax ? parsedMeta.data.tax_rate : 0;
+
   const payload = {
     p_customer_name: parsedMeta.data.customer_name || null,
     p_customer_phone: parsedMeta.data.customer_phone || null,
@@ -95,6 +107,10 @@ function parseSalePayload(
     p_note: parsedMeta.data.note || null,
     p_sold_at:
       parsedMeta.data.sold_at || (options?.defaultSoldAtToNow ? new Date().toISOString() : null),
+    p_invoice_requested: invoiceRequested,
+    p_apply_tax: applyTax,
+    p_tax_rate: taxRate,
+    p_customer_ice: invoiceRequested ? parsedMeta.data.customer_ice || null : null,
     p_items: itemsResult.items,
   };
 

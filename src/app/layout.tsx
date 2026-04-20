@@ -6,6 +6,7 @@ import "@/app/globals.css";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { ToasterProvider } from "@/components/ui/toaster-provider";
 import { SHOP_NAME } from "@/lib/config";
+import { getPublicShopSettings } from "@/lib/data/users";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -19,27 +20,47 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: `${SHOP_NAME} | Gestion de stock`,
-  description: "Application de gestion de stock, ventes et achats pour une petite quincaillerie ou magasin de materiaux.",
-  applicationName: `${SHOP_NAME} Stock`,
-  manifest: "/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: SHOP_NAME,
-  },
-  icons: {
-    icon: [{ url: "/icon.png", sizes: "512x512", type: "image/png" }],
-    apple: [{ url: "/apple-icon.png", sizes: "192x192", type: "image/png" }],
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  other: {
-    "mobile-web-app-capable": "yes",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicShopSettings();
+  const shopName = settings?.shop_name?.trim() || SHOP_NAME;
+  const title = settings?.seo_title?.trim() || `${shopName} | Gestion de stock`;
+  const description =
+    settings?.seo_description?.trim() ||
+    "Application de gestion de stock, ventes et achats pour une petite quincaillerie ou magasin de materiaux.";
+
+  return {
+    title,
+    description,
+    applicationName: `${shopName} Stock`,
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: shopName,
+    },
+    icons: {
+      icon: [{ url: "/icon.png", sizes: "512x512", type: "image/png" }],
+      apple: [{ url: "/apple-icon.png", sizes: "192x192", type: "image/png" }],
+    },
+    openGraph: {
+      title,
+      description,
+      siteName: shopName,
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    other: {
+      "mobile-web-app-capable": "yes",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#0d6f66",

@@ -107,11 +107,103 @@ textarea {
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  html,
   body {
     background: #ffffff;
+    min-height: auto;
   }
 
   .print-hidden {
     display: none !important;
+  }
+
+  .app-grid {
+    display: block !important;
+    min-height: auto !important;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .print-sheet-page {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-sheet-root {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-sheet-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .print-sheet-grid,
+  .print-sheet-grid-wide {
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  .print-sheet-grid {
+    grid-template-columns: 1.08fr 0.82fr !important;
+  }
+
+  .print-sheet-grid-wide {
+    grid-template-columns: 1fr 19rem !important;
+  }
+
+  .print-sheet-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border-radius: 12px !important;
+    padding: 10px 12px !important;
+  }
+
+  .print-sheet-title {
+    margin-top: 6px !important;
+    font-size: 2.25rem !important;
+    line-height: 1.05 !important;
+  }
+
+  .print-sheet-company-title {
+    font-size: 1.5rem !important;
+  }
+
+  .print-sheet-code {
+    font-size: 2rem !important;
+  }
+
+  .print-sheet-customer {
+    font-size: 1.75rem !important;
+    margin-top: 8px !important;
+  }
+
+  .print-sheet-total {
+    font-size: 2rem !important;
+  }
+
+  .print-sheet-meta {
+    gap: 10px !important;
+    font-size: 11px !important;
+  }
+
+  .print-sheet-table table {
+    font-size: 11px !important;
+  }
+
+  .print-sheet-table th,
+  .print-sheet-table td {
+    padding: 7px 9px !important;
   }
 }

@@ -1,12 +1,18 @@
 import type { MetadataRoute } from "next";
 
 import { SHOP_NAME } from "@/lib/config";
+import { getPublicShopSettings } from "@/lib/data/users";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const settings = await getPublicShopSettings();
+  const shopName = settings?.shop_name?.trim() || SHOP_NAME;
+  const description =
+    settings?.seo_description?.trim() || "Gestion de stock, ventes et entrees pour petit magasin.";
+
   return {
-    name: `${SHOP_NAME} Stock`,
-    short_name: SHOP_NAME,
-    description: "Gestion de stock, ventes et entrees pour petit magasin.",
+    name: `${shopName} Stock`,
+    short_name: shopName,
+    description,
     id: "/",
     start_url: "/dashboard",
     scope: "/",

@@ -115,6 +115,12 @@ export interface SaleListItem {
   customer_phone: string | null;
   payment_status: string;
   payment_method: string;
+  subtotal: number;
+  tax_amount: number;
+  tax_rate: number;
+  invoice_requested: boolean;
+  apply_tax: boolean;
+  customer_ice: string | null;
   total_amount: number;
   estimated_profit: number;
   sold_at: string;
@@ -161,12 +167,22 @@ export interface DashboardData {
 export interface ShopSettings {
   id: string;
   shop_name: string;
+  company_tagline: string | null;
   phone: string | null;
+  company_email: string | null;
+  website_url: string | null;
+  legal_identifier: string | null;
   address: string | null;
+  logo_path: string | null;
   currency: string;
   low_stock_global_threshold: number;
   allow_worker_price_visibility: boolean;
   invoice_footer: string | null;
+  invoice_prefix: string;
+  show_tax_on_invoice: boolean;
+  tax_rate: number;
+  seo_title: string | null;
+  seo_description: string | null;
 }
 
 export interface ManagedUser {

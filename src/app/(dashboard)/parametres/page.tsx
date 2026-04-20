@@ -12,14 +12,16 @@ export default async function SettingsPage() {
     <div className="space-y-5">
       <PageHeader
         eyebrow="Configuration"
-        title="Parametres du magasin"
-        description="Reglez les informations de base, les seuils d'alerte et l'affichage des prix."
+        title="Entreprise, facture et SEO"
+        description="Centralisez ici l'identite de la societe, le logo, les coordonnees, les options de TVA et les informations SEO."
       />
 
       <Card>
         <CardHeader>
           <CardTitle>Configuration generale</CardTitle>
-          <CardDescription>Ces informations sont aussi reutilisables pour les impressions.</CardDescription>
+          <CardDescription>
+            Ces informations sont reutilisees dans les factures, les apercus d&apos;entreprise et les metadata du site.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <SettingsForm settings={settings} />

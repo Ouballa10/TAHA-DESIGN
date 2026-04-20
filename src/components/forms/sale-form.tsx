@@ -6,7 +6,7 @@ import { createSaleAction, updateSaleAction } from "@/lib/actions/sales-actions"
 import { formatCurrency, formatVariantLabel } from "@/lib/utils/format";
 import { useActionToast } from "@/lib/utils/use-action-toast";
 import { initialActionState } from "@/types/actions";
-import type { SaleDetail, VariantCatalogItem } from "@/types/models";
+import type { SaleDetail, ShopSettings, VariantCatalogItem } from "@/types/models";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,10 @@ function parseDecimalInput(value: string) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function roundCurrency(value: number) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
 function updateLineField(
   lines: SaleLine[],
   key: string,
@@ -86,14 +90,24 @@ function toDateTimeLocalValue(value?: string | null) {
 export function SaleForm({
   variants,
   sale,
+  settings,
 }: {
   variants: VariantCatalogItem[];
   sale?: SaleDetail;
+  settings?: ShopSettings | null;
 }) {
   const action = sale ? updateSaleAction : createSaleAction;
   const [state, formAction] = useActionState(action, initialActionState);
   const [lines, setLines] = useState<SaleLine[]>(() => createInitialLines(sale, variants));
+  const [invoiceRequested, setInvoiceRequested] = useState(Boolean(sale?.invoice_requested));
   useActionToast(state);
+
+  const configuredTaxRate = Number(settings?.tax_rate ?? 20);
+  const defaultTaxRate = Number(sale?.tax_rate ?? 0) > 0 ? Number(sale?.tax_rate ?? 0) : configuredTaxRate;
+  const suggestedTaxEnabled = sale
+    ? Boolean(sale.invoice_requested && sale.apply_tax)
+    : Boolean(settings?.show_tax_on_invoice);
+  const [applyTax, setApplyTax] = useState(suggestedTaxEnabled);
 
   const variantMap = useMemo(
     () => Object.fromEntries(variants.map((variant) => [variant.variant_id, variant])),
@@ -151,15 +165,20 @@ export function SaleForm({
       })),
   );
 
-  const totalAmount = lines.reduce(
+  const subtotalAmount = lines.reduce(
     (sum, line) => sum + parseIntegerInput(line.quantity) * parseDecimalInput(line.unit_price),
     0,
   );
+  const effectiveTaxRate = invoiceRequested && applyTax ? defaultTaxRate : 0;
+  const taxAmount = roundCurrency(subtotalAmount * (effectiveTaxRate / 100));
+  const totalAmount = roundCurrency(subtotalAmount + taxAmount);
+  const documentLabel = invoiceRequested ? "Facture" : "Passage normal";
 
   return (
     <form action={formAction} className="space-y-5">
       {sale ? <input type="hidden" name="id" value={sale.id} /> : null}
       <input type="hidden" name="items_json" value={itemsJson} />
+      <input type="hidden" name="tax_rate" value={String(defaultTaxRate)} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
@@ -361,13 +380,81 @@ export function SaleForm({
             <Input name="sold_at" type="datetime-local" defaultValue={toDateTimeLocalValue(sale?.sold_at)} />
           </FormField>
 
+          <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                name="invoice_requested"
+                checked={invoiceRequested}
+                onChange={(event) => {
+                  setInvoiceRequested(event.target.checked);
+                }}
+                className="mt-1 size-4 rounded border-border text-brand focus:ring-brand"
+              />
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-foreground">Le client demande une facture</span>
+                <span className="mt-1 block text-xs leading-5 text-muted">
+                  Sans cette case, la vente reste un passage normal: pas d&apos;ICE acheteur et pas de TVA ajoutee.
+                </span>
+              </span>
+            </label>
+
+            {invoiceRequested ? (
+              <div className="mt-4 space-y-4 border-t border-border/70 pt-4">
+                <label className="flex cursor-pointer items-start gap-3">
+                  <input
+                    type="checkbox"
+                    name="apply_tax"
+                    checked={applyTax}
+                    onChange={(event) => setApplyTax(event.target.checked)}
+                    className="mt-1 size-4 rounded border-border text-brand focus:ring-brand"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-foreground">
+                      Ajouter la TVA ({defaultTaxRate}%)
+                    </span>
+                    <span className="mt-1 block text-xs leading-5 text-muted">
+                      Le montant saisi reste HT. Exemple: 100 devient {formatCurrency(100 + (100 * defaultTaxRate) / 100)}.
+                    </span>
+                  </span>
+                </label>
+
+                <FormField
+                  label="ICE acheteur"
+                  hint="A renseigner si le client demande une facture societe. Laissez vide pour un particulier."
+                >
+                  <Input
+                    name="customer_ice"
+                    placeholder="Optionnel si particulier"
+                    defaultValue={sale?.customer_ice ?? ""}
+                  />
+                </FormField>
+              </div>
+            ) : null}
+          </div>
+
           <FormField label="Note">
             <Textarea name="note" placeholder="Remarque interne ou client." defaultValue={sale?.note ?? ""} />
           </FormField>
 
           <div className="rounded-3xl bg-[#f8f4ee] p-4">
-            <p className="text-sm text-muted">Montant total</p>
-            <p className="mt-2 font-display text-3xl font-semibold">{formatCurrency(totalAmount)}</p>
+            <p className="text-sm text-muted">{documentLabel}</p>
+            <div className="mt-4 space-y-3 text-sm">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted">{invoiceRequested && applyTax ? "Montant HT" : "Montant saisi"}</span>
+                <span className="font-semibold text-foreground">{formatCurrency(subtotalAmount)}</span>
+              </div>
+              {invoiceRequested && applyTax ? (
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted">TVA ({effectiveTaxRate}%)</span>
+                  <span className="font-semibold text-foreground">{formatCurrency(taxAmount)}</span>
+                </div>
+              ) : null}
+              <div className="flex items-center justify-between gap-4 border-t border-border pt-3">
+                <span className="font-semibold text-foreground">{invoiceRequested && applyTax ? "Total TTC" : "Total"}</span>
+                <span className="font-display text-3xl font-semibold text-foreground">{formatCurrency(totalAmount)}</span>
+              </div>
+            </div>
           </div>
 
           {state.error ? (
