@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import type { PurchaseEntrySummary, StockMovement } from "@/types/models";
+import type { PurchaseEntrySummary, StockMovement, SupplierDirectoryItem } from "@/types/models";
 
 export async function getStockMovements(limit = 120): Promise<StockMovement[]> {
   const supabase = await createServerSupabaseClient();
@@ -33,4 +33,14 @@ export async function getSuppliers() {
     .order("name", { ascending: true });
 
   return (data ?? []) as Array<{ id: string; name: string }>;
+}
+
+export async function getSuppliersDirectory(): Promise<SupplierDirectoryItem[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from("suppliers")
+    .select("id, name, supplier_type, contact_name, ice_number, phone, email, address, notes, created_at")
+    .order("name", { ascending: true });
+
+  return (data ?? []) as SupplierDirectoryItem[];
 }

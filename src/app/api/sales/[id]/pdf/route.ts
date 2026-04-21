@@ -199,6 +199,9 @@ export async function GET(
     settings?.phone ? `Tel: ${settings.phone}` : null,
     settings?.company_email ? `Email: ${settings.company_email}` : null,
     settings?.website_url ? settings.website_url : null,
+    settings?.ice_number ? `ICE: ${settings.ice_number}` : null,
+    settings?.rc_number ? `RC: ${settings.rc_number}` : null,
+    settings?.if_number ? `IF: ${settings.if_number}` : null,
     settings?.legal_identifier ? settings.legal_identifier : null,
   ].filter(Boolean) as string[];
 

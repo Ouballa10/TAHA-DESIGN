@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import type { SaleDetail, SaleItemDetail, SaleListItem } from "@/types/models";
+import type { ClientDirectoryItem, SaleDetail, SaleItemDetail, SaleListItem } from "@/types/models";
 
 type SaleReportItem = {
   reference_snapshot: string;
@@ -86,6 +86,64 @@ export async function getSalesList(limit = 50): Promise<SaleListItem[]> {
     .limit(limit);
 
   return (data ?? []) as SaleListItem[];
+}
+
+export async function getClientsDirectory(limit = 400): Promise<ClientDirectoryItem[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from("sales_overview")
+    .select("customer_name, customer_phone, customer_ice, total_amount, sold_at")
+    .order("sold_at", { ascending: false })
+    .limit(limit);
+
+  const registry = new Map<string, ClientDirectoryItem>();
+
+  for (const row of data ?? []) {
+    const name = String((row as any).customer_name ?? "").trim();
+    const phone = String((row as any).customer_phone ?? "").trim() || null;
+    const iceNumber = String((row as any).customer_ice ?? "").trim() || null;
+    const totalAmount = Number((row as any).total_amount ?? 0);
+    const soldAt = String((row as any).sold_at ?? "");
+    const displayName = name || phone || iceNumber;
+
+    if (!displayName || !soldAt) {
+      continue;
+    }
+
+    const key = `${displayName.toLowerCase()}__${phone ?? ""}__${iceNumber ?? ""}`;
+    const existing = registry.get(key);
+
+    if (existing) {
+      existing.visits += 1;
+      existing.total_amount += totalAmount;
+
+      if (soldAt > existing.last_sale_at) {
+        existing.last_sale_at = soldAt;
+      }
+
+      if (!existing.phone && phone) {
+        existing.phone = phone;
+      }
+
+      if (!existing.ice_number && iceNumber) {
+        existing.ice_number = iceNumber;
+      }
+
+      continue;
+    }
+
+    registry.set(key, {
+      key,
+      name: displayName,
+      phone,
+      ice_number: iceNumber,
+      visits: 1,
+      total_amount: totalAmount,
+      last_sale_at: soldAt,
+    });
+  }
+
+  return Array.from(registry.values()).sort((left, right) => right.last_sale_at.localeCompare(left.last_sale_at));
 }
 
 export async function getSaleById(id: string): Promise<SaleDetail | null> {

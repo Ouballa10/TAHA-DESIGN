@@ -6,6 +6,7 @@ export type PermissionKey =
   | "viewCatalog"
   | "manageCatalog"
   | "manageCategories"
+  | "manageContacts"
   | "recordSale"
   | "createStockEntry"
   | "adjustStock"
@@ -24,6 +25,7 @@ const basePermissionsByRole: Record<RoleSlug, PermissionMap> = {
     viewCatalog: true,
     manageCatalog: true,
     manageCategories: true,
+    manageContacts: true,
     recordSale: true,
     createStockEntry: true,
     adjustStock: true,
@@ -39,6 +41,7 @@ const basePermissionsByRole: Record<RoleSlug, PermissionMap> = {
     viewCatalog: true,
     manageCatalog: true,
     manageCategories: true,
+    manageContacts: true,
     recordSale: true,
     createStockEntry: true,
     adjustStock: true,
@@ -54,6 +57,7 @@ const basePermissionsByRole: Record<RoleSlug, PermissionMap> = {
     viewCatalog: true,
     manageCatalog: false,
     manageCategories: false,
+    manageContacts: false,
     recordSale: true,
     createStockEntry: false,
     adjustStock: false,
@@ -116,6 +120,9 @@ const pathPermissions: Array<{
   permission?: PermissionKey;
 }> = [
   { href: "/dashboard", permission: "viewDashboard" },
+  { href: "/contacts", permission: "manageContacts" },
+  { href: "/clients", permission: "manageContacts" },
+  { href: "/fournisseurs", permission: "manageContacts" },
   { href: "/produits", permission: "viewCatalog" },
   { href: "/categories", permission: "manageCategories" },
   { href: "/recherche", permission: "viewCatalog" },
@@ -147,8 +154,13 @@ export const navigationItems = [
     description: "Vue d'ensemble et chiffres du jour",
   },
   {
+    href: "/contacts",
+    label: "Clients & Fournisseurs",
+    description: "Contacts commerciaux et fournisseurs",
+  },
+  {
     href: "/produits",
-    label: "Produits",
+    label: "Produits & Services",
     description: "Articles, references et photos",
   },
   {

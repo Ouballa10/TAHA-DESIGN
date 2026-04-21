@@ -172,6 +172,12 @@ export interface ShopSettings {
   company_email: string | null;
   website_url: string | null;
   legal_identifier: string | null;
+  ice_number: string | null;
+  rc_number: string | null;
+  if_number: string | null;
+  patent_number: string | null;
+  cnss_number: string | null;
+  capital_social: string | null;
   address: string | null;
   logo_path: string | null;
   currency: string;
@@ -201,4 +207,42 @@ export interface ManagedUser {
 export interface PermissionDescriptor {
   key: PermissionKey;
   label: string;
+}
+
+export interface ClientDirectoryItem {
+  key: string;
+  name: string;
+  phone: string | null;
+  ice_number: string | null;
+  visits: number;
+  total_amount: number;
+  last_sale_at: string;
+}
+
+export type ContactEntityType = "company" | "individual";
+
+export interface ClientProfileItem {
+  id: string;
+  name: string;
+  client_type: ContactEntityType;
+  contact_name: string | null;
+  ice_number: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface SupplierDirectoryItem {
+  id: string;
+  name: string;
+  supplier_type: ContactEntityType;
+  contact_name: string | null;
+  ice_number: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  notes: string | null;
+  created_at: string;
 }

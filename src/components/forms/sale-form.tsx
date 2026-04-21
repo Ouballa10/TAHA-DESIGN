@@ -6,7 +6,7 @@ import { createSaleAction, updateSaleAction } from "@/lib/actions/sales-actions"
 import { formatCurrency, formatVariantLabel } from "@/lib/utils/format";
 import { useActionToast } from "@/lib/utils/use-action-toast";
 import { initialActionState } from "@/types/actions";
-import type { SaleDetail, ShopSettings, VariantCatalogItem } from "@/types/models";
+import type { ClientProfileItem, SaleDetail, ShopSettings, VariantCatalogItem } from "@/types/models";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
@@ -87,12 +87,50 @@ function toDateTimeLocalValue(value?: string | null) {
   return localDate.toISOString().slice(0, 16);
 }
 
+function findMatchingClient(sale: SaleDetail | undefined, clients: ClientProfileItem[]) {
+  if (!sale) {
+    return null;
+  }
+
+  const saleName = sale.customer_name?.trim().toLowerCase() ?? "";
+  const salePhone = sale.customer_phone?.trim() ?? "";
+  const saleIce = sale.customer_ice?.trim() ?? "";
+
+  return (
+    clients.find((client) => {
+      const clientName = client.name.trim().toLowerCase();
+      const clientPhone = client.phone?.trim() ?? "";
+      const clientIce = client.ice_number?.trim() ?? "";
+
+      if (saleIce && clientIce && saleIce === clientIce) {
+        return true;
+      }
+
+      if (saleName && salePhone && saleName === clientName && salePhone === clientPhone) {
+        return true;
+      }
+
+      if (saleName && saleName === clientName) {
+        return true;
+      }
+
+      if (salePhone && salePhone === clientPhone) {
+        return true;
+      }
+
+      return false;
+    }) ?? null
+  );
+}
+
 export function SaleForm({
   variants,
+  clients,
   sale,
   settings,
 }: {
   variants: VariantCatalogItem[];
+  clients: ClientProfileItem[];
   sale?: SaleDetail;
   settings?: ShopSettings | null;
 }) {
@@ -101,6 +139,14 @@ export function SaleForm({
   const [lines, setLines] = useState<SaleLine[]>(() => createInitialLines(sale, variants));
   const [invoiceRequested, setInvoiceRequested] = useState(Boolean(sale?.invoice_requested));
   useActionToast(state);
+  const initialMatchedClient = findMatchingClient(sale, clients);
+  const [customerMode, setCustomerMode] = useState<"passenger" | "registered">(
+    initialMatchedClient ? "registered" : "passenger",
+  );
+  const [selectedClientId, setSelectedClientId] = useState(initialMatchedClient?.id ?? "");
+  const [manualCustomerName, setManualCustomerName] = useState(sale?.customer_name ?? "");
+  const [manualCustomerPhone, setManualCustomerPhone] = useState(sale?.customer_phone ?? "");
+  const [manualCustomerIce, setManualCustomerIce] = useState(sale?.customer_ice ?? "");
 
   const configuredTaxRate = Number(settings?.tax_rate ?? 20);
   const defaultTaxRate = Number(sale?.tax_rate ?? 0) > 0 ? Number(sale?.tax_rate ?? 0) : configuredTaxRate;
@@ -147,6 +193,10 @@ export function SaleForm({
 
     return Array.from(productMap.values()).sort((left, right) => left.name.localeCompare(right.name, "fr"));
   }, [variants]);
+  const selectedClient = useMemo(
+    () => clients.find((client) => client.id === selectedClientId) ?? null,
+    [clients, selectedClientId],
+  );
   const missingVariantCount = useMemo(() => {
     if (!sale) {
       return 0;
@@ -173,6 +223,9 @@ export function SaleForm({
   const taxAmount = roundCurrency(subtotalAmount * (effectiveTaxRate / 100));
   const totalAmount = roundCurrency(subtotalAmount + taxAmount);
   const documentLabel = invoiceRequested ? "Facture" : "Passage normal";
+  const resolvedCustomerName = customerMode === "registered" ? selectedClient?.name ?? "" : manualCustomerName;
+  const resolvedCustomerPhone = customerMode === "registered" ? selectedClient?.phone ?? "" : manualCustomerPhone;
+  const resolvedCustomerIce = customerMode === "registered" ? selectedClient?.ice_number ?? "" : manualCustomerIce;
 
   return (
     <form action={formAction} className="space-y-5">
