@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { canAccessPath, navigationItems } from "@/lib/auth/permissions";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils/cn";
 import type { UserContext } from "@/types/models";
 
@@ -22,11 +23,28 @@ function subscribeToClientReady() {
   return () => {};
 }
 
-export function MobileNav({ context, shopName }: { context: UserContext; shopName: string }) {
+function formatAlertCount(count: number) {
+  return count > 99 ? "99+" : String(count);
+}
+
+function formatAlertDescription(count: number) {
+  return count === 1 ? "1 alerte a verifier" : `${count} alertes a verifier`;
+}
+
+export function MobileNav({
+  context,
+  shopName,
+  lowStockAlertCount = 0,
+}: {
+  context: UserContext;
+  shopName: string;
+  lowStockAlertCount?: number;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const isMounted = useSyncExternalStore(subscribeToClientReady, () => true, () => false);
   const pathname = usePathname();
   const { profile } = context;
+  const hasPendingLowStockAlert = lowStockAlertCount > 0;
   const items = useMemo(
     () => navigationItems.filter((item) => canAccessPath(context, item.href)),
     [context],
@@ -91,22 +109,36 @@ export function MobileNav({ context, shopName }: { context: UserContext; shopNam
         </div>
 
         <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto py-6">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                "rounded-3xl px-3 py-4 transition",
-                isActivePath(pathname, item.href)
-                  ? "bg-white/90 text-foreground shadow-sm"
-                  : "text-foreground hover:bg-white/55",
-              )}
-            >
-              <span className="block text-[1.15rem] font-semibold leading-7">{item.label}</span>
-              <span className="mt-1.5 block text-base leading-7 text-muted">{item.description}</span>
-            </Link>
-          ))}
+          {items.map((item) => {
+            const hasLowStockAlert = item.href === "/stock/alertes" && hasPendingLowStockAlert;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  "rounded-3xl px-3 py-4 transition",
+                  isActivePath(pathname, item.href)
+                    ? "bg-white/90 text-foreground shadow-sm"
+                    : "text-foreground hover:bg-white/55",
+                  hasLowStockAlert && "ring-1 ring-danger/10",
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="block text-[1.15rem] font-semibold leading-7">{item.label}</span>
+                  {hasLowStockAlert ? (
+                    <Badge tone="danger" className="mt-1 shrink-0">
+                      {formatAlertCount(lowStockAlertCount)}
+                    </Badge>
+                  ) : null}
+                </div>
+                <span className={cn("mt-1.5 block text-base leading-7", hasLowStockAlert ? "text-danger" : "text-muted")}>
+                  {hasLowStockAlert ? formatAlertDescription(lowStockAlertCount) : item.description}
+                </span>
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="border-t border-border/70 pt-4 pb-[max(0rem,env(safe-area-inset-bottom))]">
@@ -133,8 +165,17 @@ export function MobileNav({ context, shopName }: { context: UserContext; shopNam
         aria-expanded={isOpen}
         aria-label="Ouvrir le menu"
         onClick={() => setIsOpen(true)}
-        className="inline-flex size-11 items-center justify-center rounded-2xl border border-border bg-white/90 text-foreground shadow-sm transition hover:bg-white lg:hidden"
+        className="relative inline-flex size-11 items-center justify-center rounded-2xl border border-border bg-white/90 text-foreground shadow-sm transition hover:bg-white lg:hidden"
       >
+        {hasPendingLowStockAlert ? (
+          <>
+            <span className="sr-only">{formatAlertDescription(lowStockAlertCount)}</span>
+            <span className="pointer-events-none absolute right-2 top-2 flex size-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger/60" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-danger" />
+            </span>
+          </>
+        ) : null}
         <span className="flex flex-col gap-1.5">
           <span className="block h-0.5 w-5 rounded-full bg-current" />
           <span className="block h-0.5 w-5 rounded-full bg-current" />

@@ -155,3 +155,12 @@ export async function getLowStockVariants(): Promise<VariantCatalogItem[]> {
 
   return (data ?? []) as VariantCatalogItem[];
 }
+
+export async function getLowStockAlertCount(): Promise<number> {
+  const supabase = await createServerSupabaseClient();
+  const { count } = await supabase
+    .from("low_stock_variants")
+    .select("*", { count: "exact", head: true });
+
+  return count ?? 0;
+}

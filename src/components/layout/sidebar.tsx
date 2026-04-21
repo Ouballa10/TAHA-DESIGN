@@ -3,9 +3,26 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { canAccessPath, getRoleBadgeTone, navigationItems } from "@/lib/auth/permissions";
+import { cn } from "@/lib/utils/cn";
 import type { UserContext } from "@/types/models";
 
-export function Sidebar({ context, shopName }: { context: UserContext; shopName: string }) {
+function formatAlertCount(count: number) {
+  return count > 99 ? "99+" : String(count);
+}
+
+function formatAlertDescription(count: number) {
+  return count === 1 ? "1 alerte a verifier" : `${count} alertes a verifier`;
+}
+
+export function Sidebar({
+  context,
+  shopName,
+  lowStockAlertCount = 0,
+}: {
+  context: UserContext;
+  shopName: string;
+  lowStockAlertCount?: number;
+}) {
   const { profile } = context;
 
   return (
@@ -21,16 +38,32 @@ export function Sidebar({ context, shopName }: { context: UserContext; shopName:
       <nav className="mt-6 flex flex-1 flex-col gap-2">
         {navigationItems
           .filter((item) => canAccessPath(context, item.href))
-          .map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-2xl px-4 py-3 text-sm font-medium text-foreground transition hover:bg-white/70"
-            >
-              <span className="block">{item.label}</span>
-              <span className="mt-1 block text-xs text-muted">{item.description}</span>
-            </Link>
-          ))}
+          .map((item) => {
+            const hasLowStockAlert = item.href === "/stock/alertes" && lowStockAlertCount > 0;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-2xl px-4 py-3 text-sm font-medium text-foreground transition hover:bg-white/70",
+                  hasLowStockAlert && "bg-danger/6 ring-1 ring-danger/10",
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="block">{item.label}</span>
+                  {hasLowStockAlert ? (
+                    <Badge tone="danger" className="shrink-0">
+                      {formatAlertCount(lowStockAlertCount)}
+                    </Badge>
+                  ) : null}
+                </div>
+                <span className={cn("mt-1 block text-xs", hasLowStockAlert ? "text-danger" : "text-muted")}>
+                  {hasLowStockAlert ? formatAlertDescription(lowStockAlertCount) : item.description}
+                </span>
+              </Link>
+            );
+          })}
       </nav>
 
       <div className="surface-card rounded-3xl border border-border p-5">
