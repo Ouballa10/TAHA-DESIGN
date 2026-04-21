@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireRole } from "@/lib/auth/session";
 import { getVariantCatalog } from "@/lib/data/catalog";
+import { getClientProfiles } from "@/lib/data/contacts";
 import { getSaleById } from "@/lib/data/sales";
 import { getShopSettings } from "@/lib/data/users";
 
@@ -15,7 +16,12 @@ export default async function EditSalePage({
 }) {
   await requireRole(["admin", "manager"]);
   const { id } = await params;
-  const [sale, variants, settings] = await Promise.all([getSaleById(id), getVariantCatalog(120), getShopSettings()]);
+  const [sale, variants, clients, settings] = await Promise.all([
+    getSaleById(id),
+    getVariantCatalog(120),
+    getClientProfiles(),
+    getShopSettings(),
+  ]);
 
   if (!sale) {
     notFound();
@@ -37,7 +43,7 @@ export default async function EditSalePage({
           actionLabel="Ouvrir les produits"
         />
       ) : (
-        <SaleForm variants={variants} sale={sale} settings={settings} />
+        <SaleForm variants={variants} clients={clients} sale={sale} settings={settings} />
       )}
     </div>
   );

@@ -404,12 +404,80 @@ export function SaleForm({
         </div>
 
         <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
+          <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+            <div className="grid gap-4">
+              <FormField
+                label="Type de client"
+                hint="Choisissez soit un client deja enregistre, soit un passage libre."
+              >
+                <Select
+                  value={customerMode}
+                  onChange={(event) => {
+                    const nextMode = event.target.value as "passenger" | "registered";
+                    setCustomerMode(nextMode);
+
+                    if (nextMode === "registered" && !selectedClientId && clients.length === 1) {
+                      setSelectedClientId(clients[0]?.id ?? "");
+                    }
+                  }}
+                >
+                  <option value="passenger">Passager</option>
+                  <option value="registered" disabled={clients.length === 0}>
+                    Client enregistre
+                  </option>
+                </Select>
+              </FormField>
+
+              {customerMode === "registered" ? (
+                <FormField
+                  label="Choisir un client"
+                  hint={
+                    clients.length === 0
+                      ? "Aucun client enregistre pour le moment."
+                      : "Quand un client est choisi, les champs ci-dessous se remplissent automatiquement."
+                  }
+                >
+                  <Select
+                    value={selectedClientId}
+                    required={customerMode === "registered"}
+                    onChange={(event) => setSelectedClientId(event.target.value)}
+                  >
+                    <option value="">
+                      {clients.length === 0 ? "Aucun client disponible" : "Choisir un client enregistre"}
+                    </option>
+                    {clients.map((client) => (
+                      <option key={client.id} value={client.id}>
+                        {client.name}
+                        {client.phone ? ` - ${client.phone}` : ""}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+              ) : null}
+            </div>
+          </div>
+
           <FormField label="Nom du client">
-            <Input name="customer_name" placeholder="Optionnel" defaultValue={sale?.customer_name ?? ""} />
+            <Input
+              name="customer_name"
+              placeholder={customerMode === "registered" ? "Choisissez un client enregistre" : "Optionnel"}
+              value={resolvedCustomerName}
+              readOnly={customerMode === "registered"}
+              onChange={(event) => setManualCustomerName(event.target.value)}
+              className={customerMode === "registered" ? "bg-[#f4f6f8]" : undefined}
+            />
           </FormField>
 
           <FormField label="Telephone du client">
-            <Input name="customer_phone" type="tel" placeholder="Optionnel" defaultValue={sale?.customer_phone ?? ""} />
+            <Input
+              name="customer_phone"
+              type="tel"
+              placeholder={customerMode === "registered" ? "Telephone du client choisi" : "Optionnel"}
+              value={resolvedCustomerPhone}
+              readOnly={customerMode === "registered"}
+              onChange={(event) => setManualCustomerPhone(event.target.value)}
+              className={customerMode === "registered" ? "bg-[#f4f6f8]" : undefined}
+            />
           </FormField>
 
           <FormField label="Statut paiement">
@@ -478,8 +546,11 @@ export function SaleForm({
                 >
                   <Input
                     name="customer_ice"
-                    placeholder="Optionnel si particulier"
-                    defaultValue={sale?.customer_ice ?? ""}
+                    placeholder={customerMode === "registered" ? "ICE du client choisi" : "Optionnel si particulier"}
+                    value={resolvedCustomerIce}
+                    readOnly={customerMode === "registered"}
+                    onChange={(event) => setManualCustomerIce(event.target.value)}
+                    className={customerMode === "registered" ? "bg-[#f4f6f8]" : undefined}
                   />
                 </FormField>
               </div>

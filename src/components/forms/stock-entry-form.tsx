@@ -6,7 +6,7 @@ import { createStockEntryAction } from "@/lib/actions/stock-actions";
 import { formatCurrency } from "@/lib/utils/format";
 import { useActionToast } from "@/lib/utils/use-action-toast";
 import { initialActionState } from "@/types/actions";
-import type { VariantCatalogItem } from "@/types/models";
+import type { SupplierDirectoryItem, VariantCatalogItem } from "@/types/models";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
@@ -46,18 +46,26 @@ export function StockEntryForm({
   allowAdjustments,
 }: {
   variants: VariantCatalogItem[];
-  suppliers: Array<{ id: string; name: string }>;
+  suppliers: SupplierDirectoryItem[];
   allowAdjustments: boolean;
 }) {
   const [state, formAction] = useActionState(createStockEntryAction, initialActionState);
   const [lines, setLines] = useState<EntryLine[]>([createLine()]);
   const [mode, setMode] = useState<"in" | "adjustment">("in");
+  const [supplierMode, setSupplierMode] = useState<"free" | "registered">("free");
+  const [selectedSupplierId, setSelectedSupplierId] = useState("");
+  const [manualSupplierName, setManualSupplierName] = useState("");
   useActionToast(state);
 
   const variantMap = useMemo(
     () => Object.fromEntries(variants.map((variant) => [variant.variant_id, variant])),
     [variants],
   );
+  const selectedSupplier = useMemo(
+    () => suppliers.find((supplier) => supplier.id === selectedSupplierId) ?? null,
+    [selectedSupplierId, suppliers],
+  );
+  const resolvedSupplierName = supplierMode === "registered" ? selectedSupplier?.name ?? "" : manualSupplierName;
 
   const itemsJson = JSON.stringify(
     lines
@@ -72,6 +80,7 @@ export function StockEntryForm({
   return (
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="items_json" value={itemsJson} />
+      <input type="hidden" name="supplier_id" value={supplierMode === "registered" ? selectedSupplierId : ""} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
@@ -224,20 +233,78 @@ export function StockEntryForm({
             </Select>
           </FormField>
 
-          <FormField label="Fournisseur connu">
-            <Select name="supplier_id" defaultValue="">
-              <option value="">Aucun fournisseur selectionne</option>
-              {suppliers.map((supplier) => (
-                <option key={supplier.id} value={supplier.id}>
-                  {supplier.name}
-                </option>
-              ))}
-            </Select>
+          <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+            <div className="grid gap-4">
+              <FormField
+                label="Type de fournisseur"
+                hint="Choisissez soit un nom libre, soit un fournisseur deja enregistre."
+              >
+                <Select
+                  value={supplierMode}
+                  onChange={(event) => {
+                    const nextMode = event.target.value as "free" | "registered";
+                    setSupplierMode(nextMode);
+
+                    if (nextMode === "registered" && !selectedSupplierId && suppliers.length === 1) {
+                      setSelectedSupplierId(suppliers[0]?.id ?? "");
+                    }
+                  }}
+                >
+                  <option value="free">Fournisseur libre</option>
+                  <option value="registered" disabled={suppliers.length === 0}>
+                    Fournisseur enregistre
+                  </option>
+                </Select>
+              </FormField>
+
+              {supplierMode === "registered" ? (
+                <FormField
+                  label="Choisir un fournisseur"
+                  hint={
+                    suppliers.length === 0
+                      ? "Aucun fournisseur enregistre pour le moment."
+                      : "Quand un fournisseur est choisi, le nom libre ci-dessous se remplit automatiquement."
+                  }
+                >
+                  <Select
+                    value={selectedSupplierId}
+                    required={supplierMode === "registered"}
+                    onChange={(event) => setSelectedSupplierId(event.target.value)}
+                  >
+                    <option value="">
+                      {suppliers.length === 0 ? "Aucun fournisseur disponible" : "Choisir un fournisseur enregistre"}
+                    </option>
+                    {suppliers.map((supplier) => (
+                      <option key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                        {supplier.phone ? ` - ${supplier.phone}` : ""}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+              ) : null}
+            </div>
+          </div>
+
+          <FormField label="Nom du fournisseur">
+            <Input
+              name="supplier_name"
+              placeholder={supplierMode === "registered" ? "Nom du fournisseur choisi" : "Nom visible sur le bon de reception"}
+              value={resolvedSupplierName}
+              readOnly={supplierMode === "registered"}
+              onChange={(event) => setManualSupplierName(event.target.value)}
+              className={supplierMode === "registered" ? "bg-[#f4f6f8]" : undefined}
+            />
           </FormField>
 
-          <FormField label="Nom fournisseur libre">
-            <Input name="supplier_name" placeholder="Nom visible sur le bon de reception" />
-          </FormField>
+          {supplierMode === "registered" && selectedSupplier ? (
+            <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4 text-sm leading-6 text-muted">
+              <p className="font-semibold text-foreground">{selectedSupplier.name}</p>
+              {selectedSupplier.contact_name ? <p>Contact: {selectedSupplier.contact_name}</p> : null}
+              {selectedSupplier.phone ? <p>Tel: {selectedSupplier.phone}</p> : null}
+              {selectedSupplier.email ? <p>Email: {selectedSupplier.email}</p> : null}
+            </div>
+          ) : null}
 
           <FormField label="Date">
             <Input name="movement_date" type="datetime-local" />

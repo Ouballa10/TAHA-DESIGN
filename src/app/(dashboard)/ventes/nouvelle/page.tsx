@@ -3,11 +3,16 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { getVariantCatalog } from "@/lib/data/catalog";
+import { getClientProfiles } from "@/lib/data/contacts";
 import { getShopSettings } from "@/lib/data/users";
 
 export default async function NewSalePage() {
   await requirePermission("recordSale");
-  const [variants, settings] = await Promise.all([getVariantCatalog(120), getShopSettings()]);
+  const [variants, clients, settings] = await Promise.all([
+    getVariantCatalog(120),
+    getClientProfiles(),
+    getShopSettings(),
+  ]);
 
   return (
     <div className="space-y-5">
@@ -24,7 +29,7 @@ export default async function NewSalePage() {
           actionLabel="Ouvrir les produits"
         />
       ) : (
-        <SaleForm variants={variants} settings={settings} />
+        <SaleForm variants={variants} clients={clients} settings={settings} />
       )}
     </div>
   );

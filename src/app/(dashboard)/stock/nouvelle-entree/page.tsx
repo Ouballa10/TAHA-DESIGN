@@ -2,11 +2,11 @@ import { StockEntryForm } from "@/components/forms/stock-entry-form";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { getVariantCatalog } from "@/lib/data/catalog";
-import { getSuppliers } from "@/lib/data/stock";
+import { getSupplierProfiles } from "@/lib/data/contacts";
 
 export default async function NewStockEntryPage() {
   const context = await requirePermission("createStockEntry");
-  const [variants, suppliers] = await Promise.all([getVariantCatalog(120), getSuppliers()]);
+  const [variants, suppliers] = await Promise.all([getVariantCatalog(120), getSupplierProfiles()]);
 
   return (
     <div className="space-y-5">
