@@ -4,6 +4,7 @@ import {
   amountToFrenchWords,
   buildInvoiceNumber,
   formatCurrency,
+  formatDate,
   formatDateDayMonth,
   formatPaymentMethod,
   getInvoiceTotals,
@@ -42,16 +43,31 @@ export function SaleInvoiceSheet({
   const customerName = sale.customer_name || "Client comptoir";
   const customerPhone = sale.customer_phone || "Sans telephone";
   const customerIce = sale.customer_ice?.trim() || null;
-  const contactLines = [
-    settings?.address,
-    settings?.phone ? `Tel: ${settings.phone}` : null,
-    settings?.company_email ? `Email: ${settings.company_email}` : null,
-    settings?.website_url ? settings.website_url : null,
-    settings?.ice_number ? `ICE: ${settings.ice_number}` : null,
-    settings?.rc_number ? `RC: ${settings.rc_number}` : null,
-    settings?.if_number ? `IF: ${settings.if_number}` : null,
-    settings?.legal_identifier ? settings.legal_identifier : null,
-  ].filter(Boolean) as string[];
+  const companyTopLine =
+    companyTagline && companyTagline.trim().toLowerCase() !== companyName.trim().toLowerCase()
+      ? companyTagline
+      : null;
+  const companyIceLabel = settings?.ice_number ? `ICE: ${settings.ice_number}` : null;
+  const footerAddressLine = settings?.address?.trim() || null;
+  const footerLegalLine =
+    [
+      settings?.ice_number ? `ICE : ${settings.ice_number}` : null,
+      settings?.if_number ? `IF : ${settings.if_number}` : null,
+      settings?.rc_number ? `RC : ${settings.rc_number}` : null,
+      settings?.patent_number ? `TP : ${settings.patent_number}` : null,
+      settings?.cnss_number ? `CNSS : ${settings.cnss_number}` : null,
+      settings?.phone ? `GSM : ${settings.phone}` : null,
+    ]
+      .filter(Boolean)
+      .join(", ") || null;
+  const footerContactLine =
+    [
+      settings?.website_url?.trim() || null,
+      settings?.company_email?.trim() || null,
+    ]
+      .filter(Boolean)
+      .join("  •  ") || null;
+  const footerNote = settings?.invoice_footer?.trim() || null;
 
   return (
     <section className="print-sheet-root rounded-[2rem] border border-border bg-white p-5 shadow-[0_18px_40px_rgba(12,30,37,0.06)] sm:p-8 print:rounded-none print:border-0 print:p-0 print:shadow-none">
@@ -63,13 +79,15 @@ export function SaleInvoiceSheet({
               <p className="print-sheet-title mt-3 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
                 {documentNumber}
               </p>
-              <p className="mt-3 text-sm text-muted">{isInvoice ? "Emission" : "Vente"} du {formatDateDayMonth(sale.sold_at)}</p>
+              <p className="mt-3 text-sm text-muted">
+                {isInvoice ? "Date d'emission" : "Date de vente"} : {formatDate(sale.sold_at)}
+              </p>
             </div>
 
             <div className="grid gap-3 text-sm sm:grid-cols-3 lg:min-w-[25rem]">
               <div className="rounded-[1.25rem] bg-[#f8f4ee] px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Date</p>
-                <p className="mt-2 font-semibold text-foreground">{formatDateDayMonth(sale.sold_at)}</p>
+                <p className="mt-2 font-semibold text-foreground">{formatDate(sale.sold_at)}</p>
               </div>
               <div className="rounded-[1.25rem] bg-[#f8f4ee] px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Reference</p>
@@ -103,13 +121,10 @@ export function SaleInvoiceSheet({
 
               <div className="min-w-0">
                 <p className="print-sheet-company-title font-display text-[1.85rem] font-semibold leading-tight text-foreground">{companyName}</p>
-                <p className="mt-2 text-sm leading-6 text-muted">{companyTagline}</p>
-
-                {contactLines.length > 0 ? (
-                  <div className="mt-4 space-y-1.5 text-sm leading-6 text-muted">
-                    {contactLines.map((line) => (
-                      <p key={line}>{line}</p>
-                    ))}
+                {companyTopLine ? <p className="mt-2 text-sm leading-6 text-muted">{companyTopLine}</p> : null}
+                {companyIceLabel ? (
+                  <div className="mt-4 inline-flex rounded-full bg-brand/8 px-4 py-2 text-sm font-semibold text-foreground">
+                    {companyIceLabel}
                   </div>
                 ) : null}
               </div>
@@ -120,8 +135,8 @@ export function SaleInvoiceSheet({
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted">{isInvoice ? "Facturer a" : "Client"}</p>
             <p className="print-sheet-customer mt-3 font-display text-3xl font-semibold tracking-tight text-foreground">{customerName}</p>
             <div className="mt-4 space-y-2 text-sm leading-6 text-muted">
-              <p>{customerPhone}</p>
-              {isInvoice && customerIce ? <p>ICE: {customerIce}</p> : null}
+              {customerPhone ? <p>{customerPhone}</p> : null}
+              {isInvoice && customerIce ? <p className="font-semibold text-foreground">ICE: {customerIce}</p> : null}
             </div>
           </div>
         </div>
@@ -209,10 +224,12 @@ export function SaleInvoiceSheet({
           </div>
         </div>
 
-        <div className="border-t border-border pt-5 text-xs leading-6 text-muted">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <p>{settings?.invoice_footer || "Merci pour votre confiance."}</p>
-            <p className="sm:text-right">{settings?.website_url || settings?.company_email || companyName}</p>
+        <div className="border-t border-border pt-5">
+          <div className="space-y-2 text-center">
+            {footerNote ? <p className="text-xs leading-6 text-muted">{footerNote}</p> : null}
+            {footerAddressLine ? <p className="text-base font-medium text-foreground">{footerAddressLine}</p> : null}
+            {footerLegalLine ? <p className="text-sm font-semibold text-foreground">{footerLegalLine}</p> : null}
+            {footerContactLine ? <p className="text-xs leading-6 text-muted">{footerContactLine}</p> : null}
           </div>
         </div>
       </div>

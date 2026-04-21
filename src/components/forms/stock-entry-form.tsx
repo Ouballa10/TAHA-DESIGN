@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 
 import { createStockEntryAction } from "@/lib/actions/stock-actions";
-import { formatCurrency } from "@/lib/utils/format";
+import { formatCurrency, formatVariantLabel } from "@/lib/utils/format";
 import { useActionToast } from "@/lib/utils/use-action-toast";
 import { initialActionState } from "@/types/actions";
 import type { SupplierDirectoryItem, VariantCatalogItem } from "@/types/models";
@@ -76,6 +76,12 @@ export function StockEntryForm({
         purchase_price: mode === "in" ? parseDecimalInput(line.purchase_price) : null,
       })),
   );
+  const selectedLinesCount = lines.filter((line) => line.variant_id).length;
+  const totalUnits = lines.reduce((sum, line) => sum + Math.max(parseIntegerInput(line.quantity), 0), 0);
+  const estimatedPurchaseValue = lines.reduce(
+    (sum, line) => sum + Math.max(parseIntegerInput(line.quantity), 0) * Math.max(parseDecimalInput(line.purchase_price), 0),
+    0,
+  );
 
   return (
     <form action={formAction} className="space-y-5">
@@ -96,15 +102,73 @@ export function StockEntryForm({
             </Button>
           </div>
 
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-brand/15 bg-brand/5 px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand/80">Lignes actives</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">{selectedLinesCount}</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-white px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">Quantite totale</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">{totalUnits}</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-white px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
+                {mode === "in" ? "Valeur estimee" : "Mode actif"}
+              </p>
+              <p className="mt-2 text-lg font-semibold text-foreground">
+                {mode === "in" ? formatCurrency(estimatedPurchaseValue) : "Ajustement"}
+              </p>
+            </div>
+          </div>
+
           {lines.map((line, index) => {
             const selectedVariant = variantMap[line.variant_id];
+            const lineQuantity = parseIntegerInput(line.quantity);
+            const lineAmount = lineQuantity * parseDecimalInput(line.purchase_price);
+            const detailLabel = selectedVariant ? formatVariantLabel(selectedVariant) : "";
 
             return (
-              <div key={line.key} className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.35fr)_minmax(7.5rem,0.6fr)_minmax(8.5rem,0.7fr)_auto]">
-                  <FormField label={`Article ${index + 1}`}>
+              <div
+                key={line.key}
+                className="overflow-hidden rounded-[2rem] border border-border/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(252,248,241,0.96))] p-5 shadow-[0_16px_34px_rgba(18,33,38,0.05)]"
+              >
+                <div className="flex flex-col gap-3 border-b border-border/70 pb-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <span className="inline-flex rounded-full bg-brand/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand">
+                      Article {index + 1}
+                    </span>
+                    <p className="mt-2 text-lg font-semibold text-foreground">
+                      {selectedVariant ? selectedVariant.product_name : "Selectionnez un article a receptionner"}
+                    </p>
+                    <p className="mt-1 text-sm text-muted">
+                      {selectedVariant
+                        ? `${selectedVariant.reference} • ${detailLabel === "Variant simple" ? "Article simple" : detailLabel}`
+                        : "Choisissez une reference pour afficher les details de la ligne."}
+                    </p>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    className="sm:min-w-[7.5rem] text-danger hover:bg-danger/10 hover:text-danger"
+                    onClick={() =>
+                      setLines((current) =>
+                        current.length === 1 ? [createLine()] : current.filter((entry) => entry.key !== line.key),
+                      )
+                    }
+                  >
+                    Retirer
+                  </Button>
+                </div>
+
+                <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.45fr)_minmax(8.5rem,0.55fr)_minmax(9.5rem,0.7fr)]">
+                  <FormField
+                    label="Article / reference"
+                    hint="Choisissez la reference exacte a ajouter en stock."
+                    className="md:col-span-2 xl:col-span-1"
+                  >
                     <Select
                       value={line.variant_id}
+                      className="bg-white"
                       onChange={(event) => {
                         const nextVariant = variantMap[event.target.value];
                         setLines((current) =>
@@ -120,7 +184,7 @@ export function StockEntryForm({
                         );
                       }}
                     >
-                      <option value="">Choisir un variant</option>
+                      <option value="">Choisir un article / reference</option>
                       {variants.map((variant) => (
                         <option key={variant.variant_id} value={variant.variant_id}>
                           {variant.reference} - {variant.product_name}
@@ -129,12 +193,15 @@ export function StockEntryForm({
                     </Select>
                   </FormField>
 
-                  <FormField label={mode === "in" ? "Qte recue" : "Delta"}>
+                  <FormField
+                    label={mode === "in" ? "Qte recue" : "Delta"}
+                    hint={mode === "in" ? "Nombre d'unites recues." : "Valeur positive ou negative."}
+                  >
                     <Input
                       type="number"
                       step={1}
                       inputMode="numeric"
-                      className="px-3"
+                      className="bg-white px-3"
                       value={line.quantity}
                       onChange={(event) =>
                         setLines((current) =>
@@ -163,14 +230,17 @@ export function StockEntryForm({
                     />
                   </FormField>
 
-                  <FormField label="Prix achat">
+                  <FormField
+                    label="Prix achat"
+                    hint={mode === "in" ? "Prix unitaire d'achat HT." : "Bloque en mode ajustement."}
+                  >
                     <Input
                       type="number"
                       min={0}
                       step="0.01"
                       disabled={mode !== "in"}
                       inputMode="decimal"
-                      className="px-3"
+                      className="bg-white px-3"
                       value={line.purchase_price}
                       onChange={(event) =>
                         setLines((current) =>
@@ -194,28 +264,38 @@ export function StockEntryForm({
                       }
                     />
                   </FormField>
-
-                  <div className="flex items-end md:col-span-2 xl:col-span-1">
-                    <Button
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() =>
-                        setLines((current) =>
-                          current.length === 1 ? [createLine()] : current.filter((entry) => entry.key !== line.key),
-                        )
-                      }
-                    >
-                      Retirer
-                    </Button>
-                  </div>
                 </div>
 
                 {selectedVariant ? (
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
-                    <span>Stock actuel: {selectedVariant.quantity_in_stock}</span>
-                    <span>Dernier achat: {formatCurrency(selectedVariant.purchase_price)}</span>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">Reference</p>
+                      <p className="mt-2 text-sm font-semibold text-foreground">{selectedVariant.reference}</p>
+                    </div>
+                    <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">Details</p>
+                      <p className="mt-2 text-sm font-semibold text-foreground">
+                        {detailLabel === "Variant simple" ? "Article simple" : detailLabel}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">Stock actuel</p>
+                      <p className="mt-2 text-sm font-semibold text-foreground">{selectedVariant.quantity_in_stock}</p>
+                    </div>
+                    <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
+                        {mode === "in" ? "Valeur ligne" : "Dernier achat"}
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-foreground">
+                        {mode === "in" ? formatCurrency(lineAmount) : formatCurrency(selectedVariant.purchase_price)}
+                      </p>
+                    </div>
                   </div>
-                ) : null}
+                ) : (
+                  <div className="mt-4 rounded-2xl border border-dashed border-brand/25 bg-brand/5 px-4 py-3 text-sm text-muted">
+                    Choisissez un article pour afficher le stock actuel, la reference et la valorisation de la ligne.
+                  </div>
+                )}
               </div>
             );
           })}

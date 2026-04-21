@@ -8,6 +8,7 @@ import {
   amountToFrenchWords,
   buildInvoiceNumber,
   formatCurrency,
+  formatDate,
   formatDateDayMonth,
   formatPaymentMethod,
   getInvoiceTotals,
@@ -26,8 +27,24 @@ const SUCCESS = rgb(0.05, 0.5, 0.33);
 const SOFT = rgb(0.97, 0.96, 0.93);
 const WHITE = rgb(1, 1, 1);
 
+function sanitizePdfText(input: string | number | null | undefined) {
+  return String(input ?? "")
+    .replace(/\u00A0/g, " ")
+    .replace(/[’‘]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[–—]/g, "-")
+    .replace(/•/g, "-")
+    .replace(/œ/g, "oe")
+    .replace(/Œ/g, "OE")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function wrapText(text: string, font: PDFFont, size: number, maxWidth: number) {
-  const clean = text.replace(/\s+/g, " ").trim();
+  const clean = sanitizePdfText(text);
 
   if (!clean) {
     return [""];
@@ -83,7 +100,14 @@ function drawTextLines(
   let cursor = y;
 
   for (const line of lines) {
-    page.drawText(line, {
+    const safeLine = sanitizePdfText(line);
+
+    if (!safeLine) {
+      cursor -= lineHeight;
+      continue;
+    }
+
+    page.drawText(safeLine, {
       x,
       y: cursor,
       size,
@@ -95,6 +119,71 @@ function drawTextLines(
   }
 
   return cursor;
+}
+
+function drawCenteredText(
+  page: PDFPage,
+  text: string,
+  {
+    y,
+    font,
+    size,
+    color = TEXT,
+  }: {
+    y: number;
+    font: PDFFont;
+    size: number;
+    color?: ReturnType<typeof rgb>;
+  },
+) {
+  const safeText = sanitizePdfText(text);
+
+  if (!safeText) {
+    return;
+  }
+
+  const width = font.widthOfTextAtSize(safeText, size);
+  const x = Math.max(PAGE_MARGIN, (PAGE_WIDTH - width) / 2);
+
+  page.drawText(safeText, {
+    x,
+    y,
+    size,
+    font,
+    color,
+  });
+}
+
+function drawPdfText(
+  page: PDFPage,
+  text: string | number | null | undefined,
+  {
+    x,
+    y,
+    size,
+    font,
+    color = TEXT,
+  }: {
+    x: number;
+    y: number;
+    size: number;
+    font: PDFFont;
+    color?: ReturnType<typeof rgb>;
+  },
+) {
+  const safeText = sanitizePdfText(text);
+
+  if (!safeText) {
+    return;
+  }
+
+  page.drawText(safeText, {
+    x,
+    y,
+    size,
+    font,
+    color,
+  });
 }
 
 function drawBox(page: PDFPage, x: number, yTop: number, width: number, height: number, fill = WHITE) {
@@ -193,17 +282,29 @@ export async function GET(
   const customerName = sale.customer_name || "Client comptoir";
   const customerPhone = sale.customer_phone || "Sans telephone";
   const customerIce = sale.customer_ice?.trim() || null;
-  const contactLines = [
-    companyTagline,
-    settings?.address,
-    settings?.phone ? `Tel: ${settings.phone}` : null,
-    settings?.company_email ? `Email: ${settings.company_email}` : null,
-    settings?.website_url ? settings.website_url : null,
-    settings?.ice_number ? `ICE: ${settings.ice_number}` : null,
-    settings?.rc_number ? `RC: ${settings.rc_number}` : null,
-    settings?.if_number ? `IF: ${settings.if_number}` : null,
-    settings?.legal_identifier ? settings.legal_identifier : null,
-  ].filter(Boolean) as string[];
+  const companyTopLine =
+    companyTagline.trim().toLowerCase() !== companyName.trim().toLowerCase() ? companyTagline : null;
+  const companyIceLabel = settings?.ice_number ? `ICE: ${settings.ice_number}` : null;
+  const footerAddressLine = settings?.address?.trim() || null;
+  const footerLegalLine =
+    [
+      settings?.ice_number ? `ICE : ${settings.ice_number}` : null,
+      settings?.if_number ? `IF : ${settings.if_number}` : null,
+      settings?.rc_number ? `RC : ${settings.rc_number}` : null,
+      settings?.patent_number ? `TP : ${settings.patent_number}` : null,
+      settings?.cnss_number ? `CNSS : ${settings.cnss_number}` : null,
+      settings?.phone ? `GSM : ${settings.phone}` : null,
+    ]
+      .filter(Boolean)
+      .join(", ") || null;
+  const footerContactLine =
+    [
+      settings?.website_url?.trim() || null,
+      settings?.company_email?.trim() || null,
+    ]
+      .filter(Boolean)
+      .join(" • ") || null;
+  const footerNote = settings?.invoice_footer?.trim() || null;
 
   let page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   let cursorY = PAGE_HEIGHT - PAGE_MARGIN;
@@ -220,21 +321,21 @@ export async function GET(
   };
 
   drawBox(page, PAGE_MARGIN, cursorY, CONTENT_WIDTH, 92);
-  page.drawText(documentLabel.toUpperCase(), {
+  drawPdfText(page, documentLabel.toUpperCase(), {
     x: PAGE_MARGIN + 18,
     y: cursorY - 24,
     size: 9,
     font: boldFont,
     color: BRAND,
   });
-  page.drawText(documentNumber, {
+  drawPdfText(page, documentNumber, {
     x: PAGE_MARGIN + 18,
     y: cursorY - 54,
     size: 26,
     font: boldFont,
     color: TEXT,
   });
-  page.drawText(`${isInvoice ? "Emission" : "Vente"} du ${formatDateDayMonth(sale.sold_at)}`, {
+  drawPdfText(page, `${isInvoice ? "Date d'emission" : "Date de vente"} : ${formatDate(sale.sold_at)}`, {
     x: PAGE_MARGIN + 18,
     y: cursorY - 74,
     size: 10,
@@ -244,7 +345,7 @@ export async function GET(
   drawTextLines(
     page,
     [
-      `Date: ${formatDateDayMonth(sale.sold_at)}`,
+      `Date: ${formatDate(sale.sold_at)}`,
       `Reference: ${sale.sale_number}`,
       `Operateur: ${sale.created_by_name || "Systeme"}`,
     ],
@@ -283,7 +384,7 @@ export async function GET(
       borderColor: BORDER,
       borderWidth: 1,
     });
-    page.drawText(companyName.slice(0, 1), {
+    drawPdfText(page, companyName.slice(0, 1), {
       x: PAGE_MARGIN + 34,
       y: cursorY - 60,
       size: 20,
@@ -292,7 +393,7 @@ export async function GET(
     });
   }
 
-  page.drawText(companyName, {
+  drawPdfText(page, companyName, {
     x: PAGE_MARGIN + 82,
     y: cursorY - 34,
     size: 18,
@@ -300,24 +401,45 @@ export async function GET(
     color: TEXT,
   });
 
-  drawTextLines(page, contactLines, {
-    x: PAGE_MARGIN + 82,
-    y: cursorY - 52,
-    font: regularFont,
-    size: 9.5,
-    color: MUTED,
-    lineHeight: 17,
-  });
+  if (companyTopLine) {
+    drawPdfText(page, companyTopLine, {
+      x: PAGE_MARGIN + 82,
+      y: cursorY - 54,
+      size: 9.5,
+      font: regularFont,
+      color: MUTED,
+    });
+  }
+
+  if (companyIceLabel) {
+    const chipWidth = boldFont.widthOfTextAtSize(companyIceLabel, 9.5) + 20;
+    page.drawRectangle({
+      x: PAGE_MARGIN + 82,
+      y: cursorY - 88,
+      width: chipWidth,
+      height: 22,
+      color: rgb(0.94, 0.98, 0.97),
+      borderColor: BORDER,
+      borderWidth: 0.8,
+    });
+    drawPdfText(page, companyIceLabel, {
+      x: PAGE_MARGIN + 92,
+      y: cursorY - 80,
+      size: 9.5,
+      font: boldFont,
+      color: TEXT,
+    });
+  }
 
   const customerX = PAGE_MARGIN + companyBoxWidth + 30;
-  page.drawText(isInvoice ? "FACTURER A" : "CLIENT", {
+  drawPdfText(page, isInvoice ? "FACTURER A" : "CLIENT", {
     x: customerX,
     y: cursorY - 24,
     size: 9,
     font: boldFont,
     color: MUTED,
   });
-  page.drawText(customerName, {
+  drawPdfText(page, customerName, {
     x: customerX,
     y: cursorY - 54,
     size: 18,
@@ -351,9 +473,9 @@ export async function GET(
 
   const drawTableHeader = () => {
     drawBox(page, PAGE_MARGIN, cursorY, CONTENT_WIDTH, 28, BRAND);
-    page.drawText("DESIGNATION", { x: col1, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
-    page.drawText("QTE", { x: col2, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
-    page.drawText(showTax ? "P.U. HT" : "P.U.", {
+    drawPdfText(page, "DESIGNATION", { x: col1, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
+    drawPdfText(page, "QTE", { x: col2, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
+    drawPdfText(page, showTax ? "P.U. HT" : "P.U.", {
       x: col3,
       y: cursorY - 18,
       size: 9,
@@ -361,10 +483,10 @@ export async function GET(
       color: WHITE,
     });
     if (showTax) {
-      page.drawText("TVA", { x: col4, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
-      page.drawText("TOTAL HT", { x: col5, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
+      drawPdfText(page, "TVA", { x: col4, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
+      drawPdfText(page, "TOTAL HT", { x: col5, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
     } else {
-      page.drawText("TOTAL", { x: col5, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
+      drawPdfText(page, "TOTAL", { x: col5, y: cursorY - 18, size: 9, font: boldFont, color: WHITE });
     }
     cursorY -= 28;
   };
@@ -407,14 +529,14 @@ export async function GET(
       color: TEXT,
       lineHeight: 14,
     });
-    page.drawText(String(item.quantity), {
+    drawPdfText(page, String(item.quantity), {
       x: col2 + 10,
       y: cursorY - 21,
       size: 10,
       font: regularFont,
       color: TEXT,
     });
-    page.drawText(formatCurrency(item.unit_price, currency), {
+    drawPdfText(page, formatCurrency(item.unit_price, currency), {
       x: col3 - 4,
       y: cursorY - 21,
       size: 9.5,
@@ -422,14 +544,14 @@ export async function GET(
       color: TEXT,
     });
     if (showTax) {
-      page.drawText(`${taxRate}%`, {
+      drawPdfText(page, `${taxRate}%`, {
         x: col4 + 4,
         y: cursorY - 21,
         size: 9.5,
         font: regularFont,
         color: TEXT,
       });
-      page.drawText(formatCurrency(item.line_total, currency), {
+      drawPdfText(page, formatCurrency(item.line_total, currency), {
         x: col5 - 12,
         y: cursorY - 21,
         size: 9.5,
@@ -437,7 +559,7 @@ export async function GET(
         color: TEXT,
       });
     } else {
-      page.drawText(formatCurrency(item.line_total, currency), {
+      drawPdfText(page, formatCurrency(item.line_total, currency), {
         x: col5 - 12,
         y: cursorY - 21,
         size: 9.5,
@@ -452,7 +574,8 @@ export async function GET(
   const leftBoxHeight = 104;
   const totalsBoxHeight = showTax ? 124 : 102;
   const footerBlockHeight = Math.max(leftBoxHeight, totalsBoxHeight);
-  ensureSpace(footerBlockHeight);
+  const footerInfoHeight = footerNote || footerAddressLine || footerLegalLine || footerContactLine ? 72 : 0;
+  ensureSpace(footerBlockHeight + footerInfoHeight);
 
   if (cursorY - footerBlockHeight < PAGE_MARGIN) {
     addPage();
@@ -462,7 +585,7 @@ export async function GET(
   const rightBlockWidth = 184;
 
   drawBox(page, PAGE_MARGIN, cursorY, leftBlockWidth, leftBoxHeight);
-  page.drawText(isInvoice ? "ARRETE LA PRESENTE FACTURE A LA SOMME DE :" : "ARRETE LE PRESENT BON DE VENTE A LA SOMME DE :", {
+  drawPdfText(page, isInvoice ? "ARRETE LA PRESENTE FACTURE A LA SOMME DE :" : "ARRETE LE PRESENT BON DE VENTE A LA SOMME DE :", {
     x: PAGE_MARGIN + 12,
     y: cursorY - 16,
     size: 8.5,
@@ -483,14 +606,14 @@ export async function GET(
     color: BORDER,
     thickness: 1,
   });
-  page.drawText("MODE DE PAIEMENT", {
+  drawPdfText(page, "MODE DE PAIEMENT", {
     x: PAGE_MARGIN + 12,
     y: cursorY - 86,
     size: 8.5,
     font: boldFont,
     color: MUTED,
   });
-  page.drawText(paymentMethodLabel, {
+  drawPdfText(page, paymentMethodLabel, {
     x: PAGE_MARGIN + 12,
     y: cursorY - 102,
     size: 10.5,
@@ -507,7 +630,7 @@ export async function GET(
     height: 26,
     color: BRAND,
   });
-  page.drawText("SYNTHESE", {
+  drawPdfText(page, "SYNTHESE", {
     x: totalsX + 12,
     y: cursorY - 16,
     size: 8.5,
@@ -522,8 +645,8 @@ export async function GET(
   ] as Array<[string, string]>;
 
   for (const [label, value] of totalsRows) {
-    page.drawText(label, { x: totalsX + 12, y: totalsY, size: 10, font: boldFont, color: MUTED });
-    page.drawText(value, { x: totalsX + 88, y: totalsY, size: 10, font: boldFont, color: TEXT });
+    drawPdfText(page, label, { x: totalsX + 12, y: totalsY, size: 10, font: boldFont, color: MUTED });
+    drawPdfText(page, value, { x: totalsX + 88, y: totalsY, size: 10, font: boldFont, color: TEXT });
     page.drawLine({
       start: { x: totalsX + 12, y: totalsY - 8 },
       end: { x: totalsX + rightBlockWidth - 12, y: totalsY - 8 },
@@ -533,14 +656,14 @@ export async function GET(
     totalsY -= 22;
   }
 
-  page.drawText(showTax ? "TTC" : "TOTAL", {
+  drawPdfText(page, showTax ? "TTC" : "TOTAL", {
     x: totalsX + 12,
     y: totalsY - 2,
     size: 11.5,
     font: boldFont,
     color: TEXT,
   });
-  page.drawText(formatCurrency(totals.totalAmount, currency), {
+  drawPdfText(page, formatCurrency(totals.totalAmount, currency), {
     x: totalsX + 58,
     y: totalsY - 4,
     size: 17,
@@ -548,14 +671,46 @@ export async function GET(
     color: TEXT,
   });
 
-  const footerText = settings?.invoice_footer?.trim() || "Merci pour votre confiance.";
-  page.drawText(footerText, {
-    x: PAGE_MARGIN,
-    y: PAGE_MARGIN - 2,
-    size: 8.5,
-    font: regularFont,
-    color: MUTED,
-  });
+  let footerY = PAGE_MARGIN + 44;
+
+  if (footerContactLine) {
+    drawCenteredText(page, footerContactLine, {
+      y: footerY,
+      font: regularFont,
+      size: 8.5,
+      color: MUTED,
+    });
+    footerY += 18;
+  }
+
+  if (footerLegalLine) {
+    drawCenteredText(page, footerLegalLine, {
+      y: footerY,
+      font: boldFont,
+      size: 9.5,
+      color: TEXT,
+    });
+    footerY += 20;
+  }
+
+  if (footerAddressLine) {
+    drawCenteredText(page, footerAddressLine, {
+      y: footerY,
+      font: regularFont,
+      size: 10,
+      color: TEXT,
+    });
+    footerY += 20;
+  }
+
+  if (footerNote) {
+    drawCenteredText(page, footerNote, {
+      y: footerY,
+      font: regularFont,
+      size: 8.5,
+      color: MUTED,
+    });
+  }
 
   const pdfBytes = await pdf.save();
   const pdfBuffer = new ArrayBuffer(pdfBytes.byteLength);
