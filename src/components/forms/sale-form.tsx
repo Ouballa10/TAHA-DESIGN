@@ -493,6 +493,7 @@ export function SaleForm({
               <option value="cash">Especes</option>
               <option value="card">Carte</option>
               <option value="transfer">Virement</option>
+              <option value="cheque">Cheque</option>
               <option value="other">Autre</option>
             </Select>
           </FormField>

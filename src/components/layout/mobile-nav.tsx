@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { canAccessPath, navigationItems } from "@/lib/auth/permissions";
-import { SHOP_NAME } from "@/lib/config";
 import { cn } from "@/lib/utils/cn";
 import type { UserContext } from "@/types/models";
 
@@ -23,7 +22,7 @@ function subscribeToClientReady() {
   return () => {};
 }
 
-export function MobileNav({ context }: { context: UserContext }) {
+export function MobileNav({ context, shopName }: { context: UserContext; shopName: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const isMounted = useSyncExternalStore(subscribeToClientReady, () => true, () => false);
   const pathname = usePathname();
@@ -78,7 +77,7 @@ export function MobileNav({ context }: { context: UserContext }) {
       >
         <div className="flex items-start justify-between gap-4 border-b border-border/70 pb-4">
           <div className="min-w-0">
-            <p className="font-display text-xl font-semibold">{SHOP_NAME}</p>
+            <p className="font-display text-xl font-semibold">{shopName}</p>
             <p className="mt-1 text-sm text-muted">{profile.role_label}</p>
           </div>
 

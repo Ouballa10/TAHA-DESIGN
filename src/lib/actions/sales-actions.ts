@@ -20,7 +20,7 @@ const saleMetaSchema = z.object({
   customer_name: z.string().trim().max(120).optional(),
   customer_phone: z.string().trim().max(40).optional(),
   payment_status: z.enum(["paid", "partial", "pending"]).default("paid"),
-  payment_method: z.enum(["cash", "card", "transfer", "other"]).default("cash"),
+  payment_method: z.enum(["cash", "card", "transfer", "cheque", "other"]).default("cash"),
   note: z.string().trim().max(1000).optional(),
   sold_at: z.string().trim().optional(),
   invoice_requested: z.boolean().default(false),

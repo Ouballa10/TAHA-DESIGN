@@ -3,16 +3,15 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { canAccessPath, getRoleBadgeTone, navigationItems } from "@/lib/auth/permissions";
-import { SHOP_NAME } from "@/lib/config";
 import type { UserContext } from "@/types/models";
 
-export function Sidebar({ context }: { context: UserContext }) {
+export function Sidebar({ context, shopName }: { context: UserContext; shopName: string }) {
   const { profile } = context;
 
   return (
     <aside className="print-hidden hidden border-r border-border bg-[#f7f2eb]/70 px-6 py-8 lg:flex lg:flex-col">
       <div className="surface-card rounded-3xl border border-border p-5">
-        <p className="font-display text-xl font-semibold">{SHOP_NAME}</p>
+        <p className="font-display text-xl font-semibold">{shopName}</p>
         <p className="mt-1 text-sm text-muted">Gestion stock, ventes et achats</p>
         <div className="mt-4 flex items-center gap-2">
           <Badge tone={getRoleBadgeTone(profile.role)}>{profile.role_label}</Badge>

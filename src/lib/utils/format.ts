@@ -121,6 +121,7 @@ export function formatPaymentMethod(value: string) {
     cash: "Especes",
     card: "Carte",
     transfer: "Virement",
+    cheque: "Cheque",
     other: "Autre",
   };
 
