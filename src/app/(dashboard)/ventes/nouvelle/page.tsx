@@ -5,8 +5,10 @@ import { requirePermission } from "@/lib/auth/session";
 import { getVariantCatalog } from "@/lib/data/catalog";
 import { getClientProfiles } from "@/lib/data/contacts";
 import { getShopSettings } from "@/lib/data/users";
+import { getServerI18n } from "@/lib/i18n/server";
 
 export default async function NewSalePage() {
+  const { t } = await getServerI18n();
   await requirePermission("recordSale");
   const [variants, clients, settings] = await Promise.all([
     getVariantCatalog(120),
@@ -17,16 +19,16 @@ export default async function NewSalePage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Vente rapide"
-        title="Nouvelle vente"
-        description="Choisissez le produit, puis sa reference exacte. Sans reference active, aucune vente ne peut etre saisie."
+        eyebrow={t("Vente rapide")}
+        title={t("Nouvelle vente")}
+        description={t("Choisissez le produit, puis sa reference exacte. Sans reference active, aucune vente ne peut etre saisie.")}
       />
       {variants.length === 0 ? (
         <EmptyState
-          title="Aucune reference disponible"
-          description="Aucun produit n'a encore de reference vendable. Ajoutez une reference avant la vente."
+          title={t("Aucune reference disponible")}
+          description={t("Aucun produit n'a encore de reference vendable. Ajoutez une reference avant la vente.")}
           actionHref="/produits"
-          actionLabel="Ouvrir les produits"
+          actionLabel={t("Ouvrir les produits")}
         />
       ) : (
         <SaleForm variants={variants} clients={clients} settings={settings} />

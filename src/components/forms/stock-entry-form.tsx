@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 
+import { useI18n } from "@/components/providers/locale-provider";
 import { createStockEntryAction } from "@/lib/actions/stock-actions";
 import { formatCurrency, formatVariantLabel } from "@/lib/utils/format";
 import { useActionToast } from "@/lib/utils/use-action-toast";
@@ -49,6 +50,7 @@ export function StockEntryForm({
   suppliers: SupplierDirectoryItem[];
   allowAdjustments: boolean;
 }) {
+  const { t } = useI18n();
   const [state, formAction] = useActionState(createStockEntryAction, initialActionState);
   const [lines, setLines] = useState<EntryLine[]>([createLine()]);
   const [mode, setMode] = useState<"in" | "adjustment">("in");
@@ -93,30 +95,30 @@ export function StockEntryForm({
           <div className="flex items-center justify-between">
             <div>
               <p className="font-display text-xl font-semibold">
-                {mode === "in" ? "Marchandise recue" : "Correction de stock"}
+                {mode === "in" ? t("Marchandise recue") : t("Correction de stock")}
               </p>
-              <p className="text-sm text-muted">Ajoutez une ou plusieurs lignes rapidement.</p>
+              <p className="text-sm text-muted">{t("Ajoutez une ou plusieurs lignes rapidement.")}</p>
             </div>
             <Button variant="secondary" onClick={() => setLines((current) => [...current, createLine()])}>
-              Ajouter
+              {t("Ajouter")}
             </Button>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-brand/15 bg-brand/5 px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand/80">Lignes actives</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand/80">{t("Lignes actives")}</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">{selectedLinesCount}</p>
             </div>
             <div className="rounded-2xl border border-border bg-white px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">Quantite totale</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">{t("Quantite totale")}</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">{totalUnits}</p>
             </div>
             <div className="rounded-2xl border border-border bg-white px-4 py-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
-                {mode === "in" ? "Valeur estimee" : "Mode actif"}
+                {mode === "in" ? t("Valeur estimee") : t("Mode actif")}
               </p>
               <p className="mt-2 text-lg font-semibold text-foreground">
-                {mode === "in" ? formatCurrency(estimatedPurchaseValue) : "Ajustement"}
+                {mode === "in" ? formatCurrency(estimatedPurchaseValue) : t("Ajustement")}
               </p>
             </div>
           </div>
@@ -135,15 +137,15 @@ export function StockEntryForm({
                 <div className="flex flex-col gap-3 border-b border-border/70 pb-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <span className="inline-flex rounded-full bg-brand/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand">
-                      Article {index + 1}
+                      {t("Article")} {index + 1}
                     </span>
                     <p className="mt-2 text-lg font-semibold text-foreground">
-                      {selectedVariant ? selectedVariant.product_name : "Selectionnez un article a receptionner"}
+                      {selectedVariant ? selectedVariant.product_name : t("Selectionnez un article a receptionner")}
                     </p>
                     <p className="mt-1 text-sm text-muted">
                       {selectedVariant
-                        ? `${selectedVariant.reference} • ${detailLabel === "Variant simple" ? "Article simple" : detailLabel}`
-                        : "Choisissez une reference pour afficher les details de la ligne."}
+                        ? `${selectedVariant.reference} • ${detailLabel === "Variant simple" ? t("Article simple") : detailLabel}`
+                        : t("Choisissez une reference pour afficher les details de la ligne.")}
                     </p>
                   </div>
 
@@ -156,14 +158,14 @@ export function StockEntryForm({
                       )
                     }
                   >
-                    Retirer
+                    {t("Retirer")}
                   </Button>
                 </div>
 
                 <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.45fr)_minmax(8.5rem,0.55fr)_minmax(9.5rem,0.7fr)]">
                   <FormField
-                    label="Article / reference"
-                    hint="Choisissez la reference exacte a ajouter en stock."
+                    label={t("Article / reference")}
+                    hint={t("Choisissez la reference exacte a ajouter en stock.")}
                     className="md:col-span-2 xl:col-span-1"
                   >
                     <Select
@@ -184,7 +186,7 @@ export function StockEntryForm({
                         );
                       }}
                     >
-                      <option value="">Choisir un article / reference</option>
+                      <option value="">{t("Choisir un article / reference")}</option>
                       {variants.map((variant) => (
                         <option key={variant.variant_id} value={variant.variant_id}>
                           {variant.reference} - {variant.product_name}
@@ -194,8 +196,8 @@ export function StockEntryForm({
                   </FormField>
 
                   <FormField
-                    label={mode === "in" ? "Qte recue" : "Delta"}
-                    hint={mode === "in" ? "Nombre d'unites recues." : "Valeur positive ou negative."}
+                    label={mode === "in" ? t("Qte recue") : t("Delta")}
+                    hint={mode === "in" ? t("Nombre d'unites recues.") : t("Valeur positive ou negative.")}
                   >
                     <Input
                       type="number"
@@ -231,8 +233,8 @@ export function StockEntryForm({
                   </FormField>
 
                   <FormField
-                    label="Prix achat"
-                    hint={mode === "in" ? "Prix unitaire d'achat HT." : "Bloque en mode ajustement."}
+                    label={t("Prix achat")}
+                    hint={mode === "in" ? t("Prix unitaire d'achat HT.") : t("Bloque en mode ajustement.")}
                   >
                     <Input
                       type="number"
@@ -269,22 +271,22 @@ export function StockEntryForm({
                 {selectedVariant ? (
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">Reference</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">{t("Reference")}</p>
                       <p className="mt-2 text-sm font-semibold text-foreground">{selectedVariant.reference}</p>
                     </div>
                     <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">Details</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">{t("Details")}</p>
                       <p className="mt-2 text-sm font-semibold text-foreground">
-                        {detailLabel === "Variant simple" ? "Article simple" : detailLabel}
+                        {detailLabel === "Variant simple" ? t("Article simple") : detailLabel}
                       </p>
                     </div>
                     <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">Stock actuel</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">{t("Stock actuel")}</p>
                       <p className="mt-2 text-sm font-semibold text-foreground">{selectedVariant.quantity_in_stock}</p>
                     </div>
                     <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
-                        {mode === "in" ? "Valeur ligne" : "Dernier achat"}
+                        {mode === "in" ? t("Valeur ligne") : t("Dernier achat")}
                       </p>
                       <p className="mt-2 text-sm font-semibold text-foreground">
                         {mode === "in" ? formatCurrency(lineAmount) : formatCurrency(selectedVariant.purchase_price)}
@@ -293,7 +295,7 @@ export function StockEntryForm({
                   </div>
                 ) : (
                   <div className="mt-4 rounded-2xl border border-dashed border-brand/25 bg-brand/5 px-4 py-3 text-sm text-muted">
-                    Choisissez un article pour afficher le stock actuel, la reference et la valorisation de la ligne.
+                    {t("Choisissez un article pour afficher le stock actuel, la reference et la valorisation de la ligne.")}
                   </div>
                 )}
               </div>
@@ -302,22 +304,22 @@ export function StockEntryForm({
         </div>
 
         <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
-          <FormField label="Type d'operation">
+          <FormField label={t("Type d'operation")}>
             <Select
               name="mode"
               value={mode}
               onChange={(event) => setMode(event.target.value as "in" | "adjustment")}
             >
-              <option value="in">Entree fournisseur</option>
-              {allowAdjustments ? <option value="adjustment">Correction / ajustement</option> : null}
+              <option value="in">{t("Entree fournisseur")}</option>
+              {allowAdjustments ? <option value="adjustment">{t("Correction / ajustement")}</option> : null}
             </Select>
           </FormField>
 
           <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
             <div className="grid gap-4">
               <FormField
-                label="Type de fournisseur"
-                hint="Choisissez soit un nom libre, soit un fournisseur deja enregistre."
+                label={t("Type de fournisseur")}
+                hint={t("Choisissez soit un nom libre, soit un fournisseur deja enregistre.")}
               >
                 <Select
                   value={supplierMode}
@@ -330,20 +332,20 @@ export function StockEntryForm({
                     }
                   }}
                 >
-                  <option value="free">Fournisseur libre</option>
+                  <option value="free">{t("Fournisseur libre")}</option>
                   <option value="registered" disabled={suppliers.length === 0}>
-                    Fournisseur enregistre
+                    {t("Fournisseur enregistre")}
                   </option>
                 </Select>
               </FormField>
 
               {supplierMode === "registered" ? (
                 <FormField
-                  label="Choisir un fournisseur"
+                  label={t("Choisir un fournisseur")}
                   hint={
                     suppliers.length === 0
-                      ? "Aucun fournisseur enregistre pour le moment."
-                      : "Quand un fournisseur est choisi, le nom libre ci-dessous se remplit automatiquement."
+                      ? t("Aucun fournisseur enregistre pour le moment.")
+                      : t("Quand un fournisseur est choisi, le nom libre ci-dessous se remplit automatiquement.")
                   }
                 >
                   <Select
@@ -352,7 +354,7 @@ export function StockEntryForm({
                     onChange={(event) => setSelectedSupplierId(event.target.value)}
                   >
                     <option value="">
-                      {suppliers.length === 0 ? "Aucun fournisseur disponible" : "Choisir un fournisseur enregistre"}
+                      {suppliers.length === 0 ? t("Aucun fournisseur disponible") : t("Choisir un fournisseur enregistre")}
                     </option>
                     {suppliers.map((supplier) => (
                       <option key={supplier.id} value={supplier.id}>
@@ -366,10 +368,10 @@ export function StockEntryForm({
             </div>
           </div>
 
-          <FormField label="Nom du fournisseur">
+          <FormField label={t("Nom du fournisseur")}>
             <Input
               name="supplier_name"
-              placeholder={supplierMode === "registered" ? "Nom du fournisseur choisi" : "Nom visible sur le bon de reception"}
+              placeholder={supplierMode === "registered" ? t("Nom du fournisseur choisi") : t("Nom visible sur le bon de reception")}
               value={resolvedSupplierName}
               readOnly={supplierMode === "registered"}
               onChange={(event) => setManualSupplierName(event.target.value)}
@@ -380,23 +382,23 @@ export function StockEntryForm({
           {supplierMode === "registered" && selectedSupplier ? (
             <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4 text-sm leading-6 text-muted">
               <p className="font-semibold text-foreground">{selectedSupplier.name}</p>
-              {selectedSupplier.contact_name ? <p>Contact: {selectedSupplier.contact_name}</p> : null}
-              {selectedSupplier.phone ? <p>Tel: {selectedSupplier.phone}</p> : null}
-              {selectedSupplier.email ? <p>Email: {selectedSupplier.email}</p> : null}
+              {selectedSupplier.contact_name ? <p>{t("Contact")}: {selectedSupplier.contact_name}</p> : null}
+              {selectedSupplier.phone ? <p>{t("Tel")}: {selectedSupplier.phone}</p> : null}
+              {selectedSupplier.email ? <p>{t("Email")}: {selectedSupplier.email}</p> : null}
             </div>
           ) : null}
 
-          <FormField label="Date">
+          <FormField label={t("Date")}>
             <Input name="movement_date" type="datetime-local" />
           </FormField>
 
-          <FormField label="Note">
+          <FormField label={t("Note")}>
             <Textarea
               name="note"
               placeholder={
                 mode === "in"
-                  ? "Observation sur la livraison"
-                  : "Expliquez la raison de la correction"
+                  ? t("Observation sur la livraison")
+                  : t("Expliquez la raison de la correction")
               }
             />
           </FormField>
@@ -406,7 +408,7 @@ export function StockEntryForm({
           ) : null}
 
           <SubmitButton className="w-full">
-            {mode === "in" ? "Valider l'entree" : "Valider la correction"}
+            {mode === "in" ? t("Valider l'entree") : t("Valider la correction")}
           </SubmitButton>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { useI18n } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -23,6 +24,7 @@ declare global {
 }
 
 export function InstallAppButton() {
+  const { t } = useI18n();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
 
@@ -75,7 +77,7 @@ export function InstallAppButton() {
 
   return (
     <Button variant="secondary" onClick={() => void handleInstall()}>
-      Installer l&apos;application
+      {t("Installer l'application")}
     </Button>
   );
 }

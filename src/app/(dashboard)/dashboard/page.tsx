@@ -8,19 +8,23 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireUser } from "@/lib/auth/session";
 import { getDashboardData } from "@/lib/data/dashboard";
+import { getServerI18n } from "@/lib/i18n/server";
 import { formatCompactCurrency, formatCurrency, formatDateTime, formatPaymentStatus } from "@/lib/utils/format";
 import { salesReportsPath } from "@/lib/utils/routes";
 
 export default async function DashboardPage() {
+  const { t } = await getServerI18n();
   const context = await requireUser();
   const data = await getDashboardData();
 
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Pilotage"
-        title="Tableau de bord"
-        description="Les informations essentielles pour savoir ce qui est en stock, ce qui se vend et ce qui doit etre reapprovisionne."
+        eyebrow={t("Pilotage")}
+        title={t("Tableau de bord")}
+        description={t(
+          "Les informations essentielles pour savoir ce qui est en stock, ce qui se vend et ce qui doit etre reapprovisionne.",
+        )}
         actions={
           <>
             <InstallAppButton />
@@ -29,55 +33,51 @@ export default async function DashboardPage() {
                 href={salesReportsPath()}
                 className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-white/80"
               >
-                Statistiques ventes
+                {t("Statistiques ventes")}
               </Link>
             ) : null}
             <Link
               href="/recherche"
               className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-white/80"
             >
-              Recherche rapide
+              {t("Recherche rapide")}
             </Link>
             <Link
               href="/ventes/nouvelle"
               className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-strong"
             >
-              Nouvelle vente
+              {t("Nouvelle vente")}
             </Link>
           </>
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Produits" value={String(data.totalProducts)} helper="Articles actifs dans le catalogue." />
-        <StatCard label="Variantes" value={String(data.totalVariants)} helper="References, tailles, couleurs et types." />
+        <StatCard label={t("Produits")} value={String(data.totalProducts)} helper={t("Articles actifs dans le catalogue.")} />
+        <StatCard label={t("Variantes")} value={String(data.totalVariants)} helper={t("References, tailles, couleurs et types.")} />
+        <StatCard label={t("Stock bas")} value={String(data.lowStockCount)} helper={t("Articles a surveiller ou reapprovisionner.")} />
         <StatCard
-          label="Stock bas"
-          value={String(data.lowStockCount)}
-          helper="Articles a surveiller ou reapprovisionner."
-        />
-        <StatCard
-          label="Ventes du jour"
+          label={t("Ventes du jour")}
           value={formatCompactCurrency(data.todaysSalesAmount)}
-          helper="Montant enregistre depuis minuit."
+          helper={t("Montant enregistre depuis minuit.")}
         />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Rythme commercial</CardTitle>
-            <CardDescription>Resume simple pour la journee et les 7 derniers jours.</CardDescription>
+            <CardTitle>{t("Rythme commercial")}</CardTitle>
+            <CardDescription>{t("Resume simple pour la journee et les 7 derniers jours.")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-3xl bg-[#f8f4ee] p-5">
-              <p className="text-sm text-muted">Aujourd&apos;hui</p>
+              <p className="text-sm text-muted">{t("Aujourd'hui")}</p>
               <p className="mt-2 font-display text-3xl font-semibold text-foreground">
                 {formatCurrency(data.todaysSalesAmount)}
               </p>
             </div>
             <div className="rounded-3xl bg-[#eef5f4] p-5">
-              <p className="text-sm text-muted">7 derniers jours</p>
+              <p className="text-sm text-muted">{t("7 derniers jours")}</p>
               <p className="mt-2 font-display text-3xl font-semibold text-foreground">
                 {formatCurrency(data.weekSalesAmount)}
               </p>
@@ -87,23 +87,23 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Actions rapides</CardTitle>
-            <CardDescription>Raccourcis pour les taches quotidiennes.</CardDescription>
+            <CardTitle>{t("Actions rapides")}</CardTitle>
+            <CardDescription>{t("Raccourcis pour les taches quotidiennes.")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
             <Link href="/ventes/nouvelle" className="rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white">
-              Enregistrer une vente
+              {t("Enregistrer une vente")}
             </Link>
             {context.permissions.createStockEntry ? (
               <Link href="/stock/nouvelle-entree" className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-foreground">
-                Ajouter une entree
+                {t("Ajouter une entree")}
               </Link>
             ) : null}
             <Link href="/stock/alertes" className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-foreground">
-              Voir les alertes stock
+              {t("Voir les alertes stock")}
             </Link>
             <Link href="/produits" className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-foreground">
-              Ouvrir le catalogue
+              {t("Ouvrir le catalogue")}
             </Link>
           </CardContent>
         </Card>
@@ -112,16 +112,16 @@ export default async function DashboardPage() {
       <div className="grid gap-5 xl:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Ventes recentes</CardTitle>
-            <CardDescription>Les derniers tickets saisis depuis l&apos;application.</CardDescription>
+            <CardTitle>{t("Ventes recentes")}</CardTitle>
+            <CardDescription>{t("Les derniers tickets saisis depuis l'application.")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {data.recentSales.length === 0 ? (
               <EmptyState
-                title="Aucune vente"
-                description="Les ventes apparaitront ici apres la premiere saisie."
+                title={t("Aucune vente")}
+                description={t("Les ventes apparaitront ici apres la premiere saisie.")}
                 actionHref="/ventes/nouvelle"
-                actionLabel="Creer une vente"
+                actionLabel={t("Creer une vente")}
               />
             ) : (
               data.recentSales.map((sale) => (
@@ -133,10 +133,10 @@ export default async function DashboardPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="font-semibold text-foreground">{sale.sale_number}</p>
-                      <p className="text-sm text-muted">{sale.customer_name || "Client comptoir"}</p>
+                      <p className="text-sm text-muted">{sale.customer_name || t("Client comptoir")}</p>
                     </div>
                     <Badge tone={sale.payment_status === "paid" ? "success" : "warning"}>
-                      {formatPaymentStatus(sale.payment_status)}
+                      {t(formatPaymentStatus(sale.payment_status))}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -151,24 +151,24 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Entrees recentes</CardTitle>
-            <CardDescription>Receptions fournisseurs enregistrees.</CardDescription>
+            <CardTitle>{t("Entrees recentes")}</CardTitle>
+            <CardDescription>{t("Receptions fournisseurs enregistrees.")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {data.recentEntries.length === 0 ? (
               <EmptyState
-                title="Aucune entree"
-                description="Les receptions fournisseur apparaitront ici."
+                title={t("Aucune entree")}
+                description={t("Les receptions fournisseur apparaitront ici.")}
                 actionHref="/stock/nouvelle-entree"
-                actionLabel="Ajouter une entree"
+                actionLabel={t("Ajouter une entree")}
               />
             ) : (
               data.recentEntries.map((entry) => (
                 <div key={entry.id} className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-foreground">{entry.supplier_name_snapshot || "Sans fournisseur"}</p>
-                      <p className="text-sm text-muted">{entry.note || "Aucune note"}</p>
+                      <p className="font-semibold text-foreground">{entry.supplier_name_snapshot || t("Sans fournisseur")}</p>
+                      <p className="text-sm text-muted">{entry.note || t("Aucune note")}</p>
                     </div>
                     <Badge tone="brand">{formatCurrency(entry.total_cost)}</Badge>
                   </div>

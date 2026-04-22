@@ -2,12 +2,14 @@
 
 import { useActionState } from "react";
 
+import { useI18n } from "@/components/providers/locale-provider";
 import { deleteProductAction } from "@/lib/actions/catalog-actions";
 import { useActionToast } from "@/lib/utils/use-action-toast";
 import { initialActionState } from "@/types/actions";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 
 export function DeleteProductForm({ id, name }: { id: string; name: string }) {
+  const { t } = useI18n();
   const [state, formAction] = useActionState(deleteProductAction, initialActionState);
   useActionToast(state);
 
@@ -17,9 +19,9 @@ export function DeleteProductForm({ id, name }: { id: string; name: string }) {
       <ConfirmSubmitButton
         type="submit"
         variant="danger"
-        message={`Supprimer definitivement le produit "${name}" et toutes ses variantes ?`}
+        message={t('Supprimer definitivement le produit "{name}" et toutes ses variantes ?', { name })}
       >
-        Supprimer le produit
+        {t("Supprimer le produit")}
       </ConfirmSubmitButton>
     </form>
   );

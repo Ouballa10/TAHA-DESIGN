@@ -1,6 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { useI18n } from "@/components/providers/locale-provider";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { Sidebar } from "@/components/layout/sidebar";
 import { SHOP_NAME } from "@/lib/config";
@@ -17,6 +20,8 @@ export function AppShell({
   lowStockAlertCount?: number;
   shopName?: string;
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="app-grid">
       <Sidebar context={context} shopName={shopName} lowStockAlertCount={lowStockAlertCount} />
@@ -27,7 +32,7 @@ export function AppShell({
               <MobileNav context={context} shopName={shopName} lowStockAlertCount={lowStockAlertCount} />
               <div className="min-w-0">
                 <p className="font-display text-lg font-semibold">{shopName}</p>
-                <p className="text-xs text-muted">Stock et boutique</p>
+                <p className="text-xs text-muted">{t("Stock et boutique")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -35,7 +40,7 @@ export function AppShell({
                 href="/recherche"
                 className="rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-foreground"
               >
-                Recherche
+                {t("Recherche")}
               </Link>
             </div>
           </div>

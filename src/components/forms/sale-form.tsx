@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 
+import { useI18n } from "@/components/providers/locale-provider";
 import { createSaleAction, updateSaleAction } from "@/lib/actions/sales-actions";
 import { formatCurrency, formatVariantLabel } from "@/lib/utils/format";
 import { useActionToast } from "@/lib/utils/use-action-toast";
@@ -134,6 +135,7 @@ export function SaleForm({
   sale?: SaleDetail;
   settings?: ShopSettings | null;
 }) {
+  const { t } = useI18n();
   const action = sale ? updateSaleAction : createSaleAction;
   const [state, formAction] = useActionState(action, initialActionState);
   const [lines, setLines] = useState<SaleLine[]>(() => createInitialLines(sale, variants));
@@ -222,7 +224,7 @@ export function SaleForm({
   const effectiveTaxRate = invoiceRequested && applyTax ? defaultTaxRate : 0;
   const taxAmount = roundCurrency(subtotalAmount * (effectiveTaxRate / 100));
   const totalAmount = roundCurrency(subtotalAmount + taxAmount);
-  const documentLabel = invoiceRequested ? "Facture" : "Passage normal";
+  const documentLabel = invoiceRequested ? t("Facture") : t("Passage normal");
   const resolvedCustomerName = customerMode === "registered" ? selectedClient?.name ?? "" : manualCustomerName;
   const resolvedCustomerPhone = customerMode === "registered" ? selectedClient?.phone ?? "" : manualCustomerPhone;
   const resolvedCustomerIce = customerMode === "registered" ? selectedClient?.ice_number ?? "" : manualCustomerIce;
@@ -236,8 +238,9 @@ export function SaleForm({
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
           <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4 text-sm leading-6 text-muted">
-            Choisissez d&apos;abord le <strong>produit</strong>, puis la <strong>reference</strong> si ce produit en a
-            plusieurs. Pour un produit simple, sa reference unique sera proposee automatiquement.
+            {t(
+              "Choisissez d'abord le produit, puis la reference si ce produit en a plusieurs. Pour un produit simple, sa reference unique sera proposee automatiquement.",
+            )}
           </div>
 
           {missingVariantCount > 0 ? (
@@ -248,18 +251,18 @@ export function SaleForm({
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-display text-xl font-semibold">Articles vendus</p>
-              <p className="text-sm text-muted">Selection par produit, puis par reference exacte.</p>
-            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+              <p className="font-display text-xl font-semibold">{t("Articles vendus")}</p>
+              <p className="text-sm text-muted">{t("Selection par produit, puis par reference exacte.")}</p>
+              </div>
             <Button
               type="button"
               variant="secondary"
               className="sm:self-auto"
               onClick={() => setLines((current) => [...current, createLine()])}
             >
-              Ajouter une ligne
+              {t("Ajouter une ligne")}
             </Button>
           </div>
 
@@ -271,7 +274,7 @@ export function SaleForm({
             return (
               <div key={line.key} className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
                 <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(7rem,0.5fr)_minmax(8rem,0.7fr)_auto]">
-                  <FormField label={`Produit ${index + 1}`}>
+                  <FormField label={`${t("Produit")} ${index + 1}`}>
                     <Select
                       value={line.product_id}
                       onChange={(event) => {
@@ -297,16 +300,16 @@ export function SaleForm({
                         );
                       }}
                     >
-                      <option value="">Choisir un produit</option>
+                      <option value="">{t("Choisir un produit")}</option>
                       {products.map((product) => (
                         <option key={product.id} value={product.id}>
-                          {product.name} ({product.referenceCount} ref{product.referenceCount > 1 ? "s" : ""})
+                          {product.name} ({product.referenceCount} {t("ref")}{product.referenceCount > 1 ? "s" : ""})
                         </option>
                       ))}
                     </Select>
                   </FormField>
 
-                  <FormField label="Reference">
+                  <FormField label={t("Reference")}>
                     <Select
                       value={line.variant_id}
                       disabled={!line.product_id}
@@ -326,7 +329,7 @@ export function SaleForm({
                         );
                       }}
                     >
-                      <option value="">{line.product_id ? "Choisir une reference" : "Choisir d'abord le produit"}</option>
+                      <option value="">{line.product_id ? t("Choisir une reference") : t("Choisir d'abord le produit")}</option>
                       {availableVariants.map((variant) => (
                         <option key={variant.variant_id} value={variant.variant_id}>
                           {variant.reference}
@@ -338,7 +341,7 @@ export function SaleForm({
                     </Select>
                   </FormField>
 
-                  <FormField label="Qte">
+                  <FormField label={t("Qte")}>
                     <Input
                       type="number"
                       min={1}
@@ -350,7 +353,7 @@ export function SaleForm({
                     />
                   </FormField>
 
-                  <FormField label="Prix">
+                  <FormField label={t("Prix")}>
                     <Input
                       type="number"
                       min={0}
@@ -373,30 +376,30 @@ export function SaleForm({
                         )
                       }
                     >
-                      Retirer
+                      {t("Retirer")}
                     </Button>
                   </div>
                 </div>
 
                 {selectedVariant ? (
                   <div className="mt-4 grid gap-2 text-xs text-muted sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
-                    <span>Produit: {selectedVariant.product_name}</span>
-                    <span>Reference: {selectedVariant.reference}</span>
-                    <span>Details: {formatVariantLabel(selectedVariant)}</span>
-                    <span>Stock dispo: {selectedVariant.quantity_in_stock}</span>
-                    <span>Prix conseille: {formatCurrency(selectedVariant.selling_price)}</span>
+                    <span>{t("Produit")}: {selectedVariant.product_name}</span>
+                    <span>{t("Reference")}: {selectedVariant.reference}</span>
+                    <span>{t("Details")}: {formatVariantLabel(selectedVariant)}</span>
+                    <span>{t("Stock dispo: {count}", { count: selectedVariant.quantity_in_stock })}</span>
+                    <span>{t("Prix conseille: {price}", { price: formatCurrency(selectedVariant.selling_price) })}</span>
                     {lineQuantity > selectedVariant.quantity_in_stock ? (
-                      <span className="font-semibold text-danger">Stock insuffisant</span>
+                      <span className="font-semibold text-danger">{t("Stock insuffisant")}</span>
                     ) : null}
                   </div>
                 ) : line.product_id && availableVariants.length === 1 ? (
                   <div className="mt-3 text-xs font-medium text-muted">
-                    Une seule reference existe pour ce produit. Elle sera selectionnee automatiquement.
+                    {t("Une seule reference existe pour ce produit. Elle sera selectionnee automatiquement.")}
                   </div>
                 ) : null}
 
                 {!line.product_id ? (
-                  <div className="mt-3 text-xs text-muted">Commencez par choisir le produit.</div>
+                  <div className="mt-3 text-xs text-muted">{t("Commencez par choisir le produit.")}</div>
                 ) : null}
               </div>
             );
@@ -407,8 +410,8 @@ export function SaleForm({
           <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
             <div className="grid gap-4">
               <FormField
-                label="Type de client"
-                hint="Choisissez soit un client deja enregistre, soit un passage libre."
+                label={t("Type de client")}
+                hint={t("Choisissez soit un client deja enregistre, soit un passage libre.")}
               >
                 <Select
                   value={customerMode}
@@ -421,20 +424,20 @@ export function SaleForm({
                     }
                   }}
                 >
-                  <option value="passenger">Passager</option>
+                  <option value="passenger">{t("Passager")}</option>
                   <option value="registered" disabled={clients.length === 0}>
-                    Client enregistre
+                    {t("Client enregistre")}
                   </option>
                 </Select>
               </FormField>
 
               {customerMode === "registered" ? (
                 <FormField
-                  label="Choisir un client"
+                  label={t("Choisir un client")}
                   hint={
                     clients.length === 0
-                      ? "Aucun client enregistre pour le moment."
-                      : "Quand un client est choisi, les champs ci-dessous se remplissent automatiquement."
+                      ? t("Aucun client enregistre pour le moment.")
+                      : t("Quand un client est choisi, les champs ci-dessous se remplissent automatiquement.")
                   }
                 >
                   <Select
@@ -443,7 +446,7 @@ export function SaleForm({
                     onChange={(event) => setSelectedClientId(event.target.value)}
                   >
                     <option value="">
-                      {clients.length === 0 ? "Aucun client disponible" : "Choisir un client enregistre"}
+                      {clients.length === 0 ? t("Aucun client disponible") : t("Choisir un client enregistre")}
                     </option>
                     {clients.map((client) => (
                       <option key={client.id} value={client.id}>
@@ -457,10 +460,10 @@ export function SaleForm({
             </div>
           </div>
 
-          <FormField label="Nom du client">
+          <FormField label={t("Nom du client")}>
             <Input
               name="customer_name"
-              placeholder={customerMode === "registered" ? "Choisissez un client enregistre" : "Optionnel"}
+              placeholder={customerMode === "registered" ? t("Choisissez un client enregistre") : t("Optionnel")}
               value={resolvedCustomerName}
               readOnly={customerMode === "registered"}
               onChange={(event) => setManualCustomerName(event.target.value)}
@@ -468,11 +471,11 @@ export function SaleForm({
             />
           </FormField>
 
-          <FormField label="Telephone du client">
+          <FormField label={t("Telephone du client")}>
             <Input
               name="customer_phone"
               type="tel"
-              placeholder={customerMode === "registered" ? "Telephone du client choisi" : "Optionnel"}
+              placeholder={customerMode === "registered" ? t("Telephone du client choisi") : t("Optionnel")}
               value={resolvedCustomerPhone}
               readOnly={customerMode === "registered"}
               onChange={(event) => setManualCustomerPhone(event.target.value)}
@@ -480,25 +483,25 @@ export function SaleForm({
             />
           </FormField>
 
-          <FormField label="Statut paiement">
+          <FormField label={t("Statut paiement")}>
             <Select name="payment_status" defaultValue={sale?.payment_status ?? "paid"}>
-              <option value="paid">Paye</option>
-              <option value="partial">Partiel</option>
-              <option value="pending">En attente</option>
+              <option value="paid">{t("Paye")}</option>
+              <option value="partial">{t("Partiel")}</option>
+              <option value="pending">{t("En attente")}</option>
             </Select>
           </FormField>
 
-          <FormField label="Mode de paiement">
+          <FormField label={t("Mode de paiement")}>
             <Select name="payment_method" defaultValue={sale?.payment_method ?? "cash"}>
-              <option value="cash">Especes</option>
-              <option value="card">Carte</option>
-              <option value="transfer">Virement</option>
-              <option value="cheque">Cheque</option>
-              <option value="other">Autre</option>
+              <option value="cash">{t("Especes")}</option>
+              <option value="card">{t("Carte")}</option>
+              <option value="transfer">{t("Virement")}</option>
+              <option value="cheque">{t("Cheque")}</option>
+              <option value="other">{t("Autre")}</option>
             </Select>
           </FormField>
 
-          <FormField label="Date de vente">
+          <FormField label={t("Date de vente")}>
             <Input name="sold_at" type="datetime-local" defaultValue={toDateTimeLocalValue(sale?.sold_at)} />
           </FormField>
 
@@ -514,9 +517,9 @@ export function SaleForm({
                 className="mt-1 size-4 rounded border-border text-brand focus:ring-brand"
               />
               <span className="min-w-0">
-                <span className="block text-sm font-semibold text-foreground">Le client demande une facture</span>
+                <span className="block text-sm font-semibold text-foreground">{t("Le client demande une facture")}</span>
                 <span className="mt-1 block text-xs leading-5 text-muted">
-                  Sans cette case, la vente reste un passage normal: pas d&apos;ICE acheteur et pas de TVA ajoutee.
+                  {t("Sans cette case, la vente reste un passage normal: pas d'ICE acheteur et pas de TVA ajoutee.")}
                 </span>
               </span>
             </label>
@@ -533,7 +536,7 @@ export function SaleForm({
                   />
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold text-foreground">
-                      Ajouter la TVA ({defaultTaxRate}%)
+                      {t("Ajouter la TVA ({taxRate}%)", { taxRate: defaultTaxRate })}
                     </span>
                     <span className="mt-1 block text-xs leading-5 text-muted">
                       Le montant saisi reste HT. Exemple: 100 devient {formatCurrency(100 + (100 * defaultTaxRate) / 100)}.
@@ -542,12 +545,12 @@ export function SaleForm({
                 </label>
 
                 <FormField
-                  label="ICE acheteur"
-                  hint="A renseigner si le client demande une facture societe. Laissez vide pour un particulier."
+                  label={t("ICE acheteur")}
+                  hint={t("A renseigner si le client demande une facture societe. Laissez vide pour un particulier.")}
                 >
                   <Input
                     name="customer_ice"
-                    placeholder={customerMode === "registered" ? "ICE du client choisi" : "Optionnel si particulier"}
+                    placeholder={customerMode === "registered" ? t("ICE du client choisi") : t("Optionnel si particulier")}
                     value={resolvedCustomerIce}
                     readOnly={customerMode === "registered"}
                     onChange={(event) => setManualCustomerIce(event.target.value)}
@@ -558,15 +561,15 @@ export function SaleForm({
             ) : null}
           </div>
 
-          <FormField label="Note">
-            <Textarea name="note" placeholder="Remarque interne ou client." defaultValue={sale?.note ?? ""} />
+          <FormField label={t("Note")}>
+            <Textarea name="note" placeholder={t("Remarque interne ou client.")} defaultValue={sale?.note ?? ""} />
           </FormField>
 
           <div className="rounded-3xl bg-[#f8f4ee] p-4">
             <p className="text-sm text-muted">{documentLabel}</p>
             <div className="mt-4 space-y-3 text-sm">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-muted">{invoiceRequested && applyTax ? "Montant HT" : "Montant saisi"}</span>
+                <span className="text-muted">{invoiceRequested && applyTax ? t("Montant HT") : t("Montant saisi")}</span>
                 <span className="font-semibold text-foreground">{formatCurrency(subtotalAmount)}</span>
               </div>
               {invoiceRequested && applyTax ? (
@@ -576,7 +579,7 @@ export function SaleForm({
                 </div>
               ) : null}
               <div className="flex items-center justify-between gap-4 border-t border-border pt-3">
-                <span className="font-semibold text-foreground">{invoiceRequested && applyTax ? "Total TTC" : "Total"}</span>
+                <span className="font-semibold text-foreground">{invoiceRequested && applyTax ? t("Total TTC") : t("Total")}</span>
                 <span className="font-display text-3xl font-semibold text-foreground">{formatCurrency(totalAmount)}</span>
               </div>
             </div>
@@ -588,9 +591,9 @@ export function SaleForm({
 
           <SubmitButton
             className="w-full"
-            pendingLabel={sale ? "Mise a jour de la vente..." : "Validation de la vente..."}
+            pendingLabel={sale ? t("Mise a jour de la vente...") : t("Validation de la vente...")}
           >
-            {sale ? "Enregistrer les modifications" : "Valider la vente"}
+            {sale ? t("Enregistrer les modifications") : t("Valider la vente")}
           </SubmitButton>
         </div>
       </div>

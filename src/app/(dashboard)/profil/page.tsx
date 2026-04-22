@@ -2,24 +2,27 @@ import { ProfileForm } from "@/components/forms/profile-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { getRoleLabel } from "@/lib/auth/permissions";
 import { requireUser } from "@/lib/auth/session";
+import { getServerI18n } from "@/lib/i18n/server";
 
 export default async function ProfilePage() {
+  const { locale, t } = await getServerI18n();
   const context = await requireUser();
 
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Mon compte"
-        title="Profil"
-        description="Gardez vos coordonnees a jour pour identifier correctement les mouvements et ventes."
+        eyebrow={t("Mon compte")}
+        title={t("Profil")}
+        description={t("Gardez vos coordonnees a jour pour identifier correctement les mouvements et ventes.")}
       />
 
       <div className="grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Resume utilisateur</CardTitle>
-            <CardDescription>Role et permissions principales.</CardDescription>
+            <CardTitle>{t("Resume utilisateur")}</CardTitle>
+            <CardDescription>{t("Role et permissions principales.")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -29,7 +32,7 @@ export default async function ProfilePage() {
               <p className="text-sm text-muted">{context.profile.email}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Badge tone="brand">{context.profile.role_label}</Badge>
+              <Badge tone="brand">{getRoleLabel(context.profile.role, locale)}</Badge>
             </div>
           </CardContent>
         </Card>

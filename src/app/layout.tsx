@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Cairo, Manrope, Space_Grotesk } from "next/font/google";
 
 import "@/app/globals.css";
+import { LocaleProvider } from "@/components/providers/locale-provider";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { ToasterProvider } from "@/components/ui/toaster-provider";
 import { SHOP_NAME } from "@/lib/config";
 import { getPublicShopSettings } from "@/lib/data/users";
+import { getServerI18n, getServerLocale } from "@/lib/i18n/server";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -20,18 +22,25 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
+  display: "swap",
+});
+
 export async function generateMetadata(): Promise<Metadata> {
+  const { locale, t } = await getServerI18n();
   const settings = await getPublicShopSettings();
   const shopName = settings?.shop_name?.trim() || SHOP_NAME;
-  const title = settings?.seo_title?.trim() || `${shopName} | Gestion de stock`;
+  const title = settings?.seo_title?.trim() || `${shopName} | ${t("Gestion de stock")}`;
   const description =
     settings?.seo_description?.trim() ||
-    "Application de gestion de stock, ventes et achats pour une petite quincaillerie ou magasin de materiaux.";
+    t("Application de gestion de stock, ventes et achats pour une petite quincaillerie ou magasin de materiaux.");
 
   return {
     title,
     description,
-    applicationName: `${shopName} Stock`,
+    applicationName: `${shopName} ${t("Stock")}`,
     manifest: "/manifest.webmanifest",
     appleWebApp: {
       capable: true,
@@ -56,6 +65,12 @@ export async function generateMetadata(): Promise<Metadata> {
     formatDetection: {
       telephone: false,
     },
+    alternates: {
+      languages: {
+        fr: "/",
+        ar: "/",
+      },
+    },
     other: {
       "mobile-web-app-capable": "yes",
     },
@@ -75,12 +90,29 @@ export default function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
+  return <RootLayoutContent>{children}</RootLayoutContent>;
+}
+
+async function RootLayoutContent({
+  children,
+}: Readonly<{
+  children: ReactNode;
+}>) {
+  const { dir } = await getServerI18n();
+  const locale = await getServerLocale();
+
   return (
-    <html lang="fr" className={`${manrope.variable} ${spaceGrotesk.variable}`}>
+    <html
+      lang={locale}
+      dir={dir}
+      className={`${manrope.variable} ${spaceGrotesk.variable} ${cairo.variable} ${locale === "ar" ? "locale-ar" : ""}`}
+    >
       <body>
-        {children}
-        <PwaRegister />
-        <ToasterProvider />
+        <LocaleProvider locale={locale}>
+          {children}
+          <PwaRegister />
+          <ToasterProvider />
+        </LocaleProvider>
       </body>
     </html>
   );

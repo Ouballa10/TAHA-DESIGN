@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { useI18n } from "@/components/providers/locale-provider";
 import { RemoteImage } from "@/components/ui/remote-image";
 import { upsertProductAction } from "@/lib/actions/catalog-actions";
 import { getPublicImageUrl } from "@/lib/utils/images";
@@ -21,6 +22,7 @@ export function ProductForm({
   categories: Category[];
   product?: ProductDetail | null;
 }) {
+  const { t } = useI18n();
   const [state, formAction] = useActionState(upsertProductAction, initialActionState);
   useActionToast(state);
 
@@ -32,13 +34,13 @@ export function ProductForm({
         <input type="hidden" name="id" defaultValue={product?.id} />
         <input type="hidden" name="existing_main_photo_path" defaultValue={product?.main_photo_path ?? ""} />
 
-        <FormField label="Nom du produit">
+        <FormField label={t("Nom du produit")}>
           <Input name="name" defaultValue={product?.name} placeholder="Bardage PVC" required />
         </FormField>
 
-        <FormField label="Categorie">
+        <FormField label={t("Categorie")}>
           <Select name="category_id" defaultValue={product?.category_id ?? ""}>
-            <option value="">Sans categorie</option>
+            <option value="">{t("Sans categorie")}</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
@@ -47,28 +49,28 @@ export function ProductForm({
           </Select>
         </FormField>
 
-        <FormField label="Description">
+        <FormField label={t("Description")}>
           <Textarea
             name="description"
             defaultValue={product?.description ?? ""}
-            placeholder="Details utiles pour les employes et la recherche."
+            placeholder={t("Details utiles pour les employes et la recherche.")}
           />
         </FormField>
 
         <label className="flex items-center gap-3 rounded-2xl border border-border bg-white/80 px-4 py-3 text-sm font-medium text-foreground">
           <input type="checkbox" name="is_active" defaultChecked={product?.is_active ?? true} className="size-4" />
-          Produit actif
+          {t("Produit actif")}
         </label>
 
         {state.error ? (
           <div className="rounded-2xl bg-danger/10 px-4 py-3 text-sm text-danger">{state.error}</div>
         ) : null}
 
-        <SubmitButton>{product ? "Mettre a jour le produit" : "Creer le produit"}</SubmitButton>
+        <SubmitButton>{product ? t("Mettre a jour le produit") : t("Creer le produit")}</SubmitButton>
       </div>
 
       <div className="space-y-5 rounded-3xl border border-border bg-white/70 p-5">
-        <FormField label="Photo principale" hint="Format JPG, PNG ou WebP.">
+        <FormField label={t("Photo principale")} hint={t("Format JPG, PNG ou WebP.")}>
           <Input name="main_photo" type="file" accept="image/*" />
         </FormField>
 
@@ -76,19 +78,19 @@ export function ProductForm({
           <div className="overflow-hidden rounded-3xl border border-border bg-[#f1eee9]">
             <RemoteImage
               src={imageUrl}
-              alt={product?.name ?? "Photo produit"}
+              alt={product?.name ?? t("Photo produit")}
               sizes="(max-width: 1024px) 100vw, 30vw"
               className="aspect-[4/3]"
             />
           </div>
         ) : (
           <div className="rounded-3xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted">
-            Aucune photo pour ce produit.
+            {t("Aucune photo pour ce produit.")}
           </div>
         )}
 
         <p className="text-sm leading-6 text-muted">
-          Si un variant n&apos;a pas sa propre photo, cette image sera utilisee automatiquement.
+          {t("Si un variant n'a pas sa propre photo, cette image sera utilisee automatiquement.")}
         </p>
       </div>
     </form>

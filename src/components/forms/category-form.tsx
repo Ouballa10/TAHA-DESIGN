@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { useI18n } from "@/components/providers/locale-provider";
 import { upsertCategoryAction } from "@/lib/actions/catalog-actions";
 import { useActionToast } from "@/lib/utils/use-action-toast";
 import type { Category } from "@/types/models";
@@ -18,17 +19,18 @@ export function CategoryForm({
   category?: Category;
   submitLabel?: string;
 }) {
+  const { t } = useI18n();
   const [state, formAction] = useActionState(upsertCategoryAction, initialActionState);
   useActionToast(state);
 
   return (
     <form action={formAction} className="grid gap-4 md:grid-cols-2">
       <input type="hidden" name="id" defaultValue={category?.id} />
-      <FormField label="Nom de la categorie" error={state.fieldErrors?.name}>
-        <Input name="name" defaultValue={category?.name} placeholder="Quincaillerie" required />
+      <FormField label={t("Nom de la categorie")} error={state.fieldErrors?.name}>
+        <Input name="name" defaultValue={category?.name} placeholder={t("Quincaillerie")} required />
       </FormField>
 
-      <FormField label="Ordre d'affichage">
+      <FormField label={t("Ordre d'affichage")}>
         <Input
           name="sort_order"
           type="number"
@@ -38,11 +40,11 @@ export function CategoryForm({
         />
       </FormField>
 
-      <FormField label="Description" className="md:col-span-2">
+      <FormField label={t("Description")} className="md:col-span-2">
         <Textarea
           name="description"
           defaultValue={category?.description ?? ""}
-          placeholder="Categorie utilisee pour les recherches rapides."
+          placeholder={t("Categorie utilisee pour les recherches rapides.")}
         />
       </FormField>
 

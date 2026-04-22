@@ -5,8 +5,10 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { useI18n } from "@/components/providers/locale-provider";
 import { logoutAction } from "@/lib/actions/auth-actions";
-import { canAccessPath, navigationItems } from "@/lib/auth/permissions";
+import { canAccessPath, getNavigationItems, getRoleLabel } from "@/lib/auth/permissions";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils/cn";
 import type { UserContext } from "@/types/models";
@@ -27,8 +29,8 @@ function formatAlertCount(count: number) {
   return count > 99 ? "99+" : String(count);
 }
 
-function formatAlertDescription(count: number) {
-  return count === 1 ? "1 alerte a verifier" : `${count} alertes a verifier`;
+function formatAlertDescription(count: number, t: (source: string, values?: Record<string, string | number>) => string) {
+  return count === 1 ? t("1 alerte a verifier") : t("{count} alertes a verifier", { count });
 }
 
 export function MobileNav({
@@ -40,14 +42,15 @@ export function MobileNav({
   shopName: string;
   lowStockAlertCount?: number;
 }) {
+  const { locale, t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const isMounted = useSyncExternalStore(subscribeToClientReady, () => true, () => false);
   const pathname = usePathname();
   const { profile } = context;
   const hasPendingLowStockAlert = lowStockAlertCount > 0;
   const items = useMemo(
-    () => navigationItems.filter((item) => canAccessPath(context, item.href)),
-    [context],
+    () => getNavigationItems(locale).filter((item) => canAccessPath(context, item.href)),
+    [context, locale],
   );
 
   useEffect(() => {
@@ -78,7 +81,7 @@ export function MobileNav({
     >
       <button
         type="button"
-        aria-label="Fermer le menu"
+        aria-label={t("Fermer le menu")}
         onClick={() => setIsOpen(false)}
         className={cn(
           "absolute inset-0 bg-foreground/35 transition duration-200",
@@ -96,7 +99,7 @@ export function MobileNav({
         <div className="flex items-start justify-between gap-4 border-b border-border/70 pb-4">
           <div className="min-w-0">
             <p className="font-display text-xl font-semibold">{shopName}</p>
-            <p className="mt-1 text-sm text-muted">{profile.role_label}</p>
+            <p className="mt-1 text-sm text-muted">{getRoleLabel(profile.role, locale)}</p>
           </div>
 
           <button
@@ -104,7 +107,7 @@ export function MobileNav({
             onClick={() => setIsOpen(false)}
             className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border bg-white px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-[#f4eee6]"
           >
-            Fermer
+            {t("Fermer")}
           </button>
         </div>
 
@@ -134,7 +137,7 @@ export function MobileNav({
                   ) : null}
                 </div>
                 <span className={cn("mt-1.5 block text-base leading-7", hasLowStockAlert ? "text-danger" : "text-muted")}>
-                  {hasLowStockAlert ? formatAlertDescription(lowStockAlertCount) : item.description}
+                  {hasLowStockAlert ? formatAlertDescription(lowStockAlertCount, t) : item.description}
                 </span>
               </Link>
             );
@@ -144,12 +147,13 @@ export function MobileNav({
         <div className="border-t border-border/70 pt-4 pb-[max(0rem,env(safe-area-inset-bottom))]">
           <p className="text-sm font-semibold">{profile.full_name || profile.email}</p>
           <p className="mt-1 text-sm text-muted">{profile.email}</p>
+          <LanguageSwitcher className="mt-4" />
           <form action={logoutAction} className="mt-4">
             <button
               type="submit"
               className="inline-flex w-full justify-center rounded-2xl bg-foreground px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
             >
-              Se deconnecter
+              {t("Se deconnecter")}
             </button>
           </form>
         </div>
@@ -163,13 +167,13 @@ export function MobileNav({
         type="button"
         aria-controls="mobile-navigation"
         aria-expanded={isOpen}
-        aria-label="Ouvrir le menu"
+        aria-label={t("Ouvrir le menu")}
         onClick={() => setIsOpen(true)}
         className="relative inline-flex size-11 items-center justify-center rounded-2xl border border-border bg-white/90 text-foreground shadow-sm transition hover:bg-white lg:hidden"
       >
         {hasPendingLowStockAlert ? (
           <>
-            <span className="sr-only">{formatAlertDescription(lowStockAlertCount)}</span>
+            <span className="sr-only">{formatAlertDescription(lowStockAlertCount, t)}</span>
             <span className="pointer-events-none absolute right-2 top-2 flex size-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger/60" />
               <span className="relative inline-flex size-2.5 rounded-full bg-danger" />

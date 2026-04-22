@@ -33,6 +33,11 @@
   --font-display: var(--font-space-grotesk);
 }
 
+html.locale-ar {
+  --font-manrope: var(--font-cairo);
+  --font-space-grotesk: var(--font-cairo);
+}
+
 * {
   box-sizing: border-box;
 }

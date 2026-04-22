@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { useI18n } from "@/components/providers/locale-provider";
 import { deleteVariantAction } from "@/lib/actions/catalog-actions";
 import { useActionToast } from "@/lib/utils/use-action-toast";
 import { initialActionState } from "@/types/actions";
@@ -16,6 +17,7 @@ export function DeleteVariantForm({
   productId: string;
   reference: string;
 }) {
+  const { t } = useI18n();
   const [state, formAction] = useActionState(deleteVariantAction, initialActionState);
   useActionToast(state);
 
@@ -26,9 +28,9 @@ export function DeleteVariantForm({
       <ConfirmSubmitButton
         type="submit"
         variant="danger"
-        message={`Supprimer definitivement la variante "${reference}" ?`}
+        message={t('Supprimer definitivement la variante "{reference}" ?', { reference })}
       >
-        Supprimer la variante
+        {t("Supprimer la variante")}
       </ConfirmSubmitButton>
     </form>
   );

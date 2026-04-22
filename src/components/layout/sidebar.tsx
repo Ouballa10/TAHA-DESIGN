@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Badge } from "@/components/ui/badge";
 import { logoutAction } from "@/lib/actions/auth-actions";
-import { canAccessPath, getRoleBadgeTone, navigationItems } from "@/lib/auth/permissions";
+import { canAccessPath, getNavigationItems, getRoleBadgeTone, getRoleLabel } from "@/lib/auth/permissions";
+import { useI18n } from "@/components/providers/locale-provider";
 import { cn } from "@/lib/utils/cn";
 import type { UserContext } from "@/types/models";
 
@@ -10,8 +14,8 @@ function formatAlertCount(count: number) {
   return count > 99 ? "99+" : String(count);
 }
 
-function formatAlertDescription(count: number) {
-  return count === 1 ? "1 alerte a verifier" : `${count} alertes a verifier`;
+function formatAlertDescription(count: number, t: (source: string, values?: Record<string, string | number>) => string) {
+  return count === 1 ? t("1 alerte a verifier") : t("{count} alertes a verifier", { count });
 }
 
 export function Sidebar({
@@ -23,15 +27,17 @@ export function Sidebar({
   shopName: string;
   lowStockAlertCount?: number;
 }) {
+  const { locale, t } = useI18n();
   const { profile } = context;
+  const navigationItems = getNavigationItems(locale);
 
   return (
     <aside className="print-hidden hidden border-r border-border bg-[#f7f2eb]/70 px-6 py-8 lg:flex lg:flex-col">
       <div className="surface-card rounded-3xl border border-border p-5">
         <p className="font-display text-xl font-semibold">{shopName}</p>
-        <p className="mt-1 text-sm text-muted">Gestion stock, ventes et achats</p>
+        <p className="mt-1 text-sm text-muted">{t("Gestion stock, ventes et achats")}</p>
         <div className="mt-4 flex items-center gap-2">
-          <Badge tone={getRoleBadgeTone(profile.role)}>{profile.role_label}</Badge>
+          <Badge tone={getRoleBadgeTone(profile.role)}>{getRoleLabel(profile.role, locale)}</Badge>
         </div>
       </div>
 
@@ -59,7 +65,7 @@ export function Sidebar({
                   ) : null}
                 </div>
                 <span className={cn("mt-1 block text-xs", hasLowStockAlert ? "text-danger" : "text-muted")}>
-                  {hasLowStockAlert ? formatAlertDescription(lowStockAlertCount) : item.description}
+                  {hasLowStockAlert ? formatAlertDescription(lowStockAlertCount, t) : item.description}
                 </span>
               </Link>
             );
@@ -69,12 +75,13 @@ export function Sidebar({
       <div className="surface-card rounded-3xl border border-border p-5">
         <p className="text-sm font-semibold">{profile.full_name || profile.email}</p>
         <p className="mt-1 text-xs text-muted">{profile.email}</p>
+        <LanguageSwitcher className="mt-4" />
         <form action={logoutAction} className="mt-4">
           <button
             type="submit"
             className="inline-flex w-full justify-center rounded-2xl bg-foreground px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           >
-            Se deconnecter
+            {t("Se deconnecter")}
           </button>
         </form>
       </div>

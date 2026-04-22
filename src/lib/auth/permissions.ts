@@ -1,4 +1,6 @@
 import type { RoleSlug, UserContext } from "@/types/models";
+import { defaultLocale, type AppLocale } from "@/lib/i18n/config";
+import { translate } from "@/lib/i18n/messages";
 import { adminUsersPath, salesReportsPath } from "@/lib/utils/routes";
 
 export type PermissionKey =
@@ -76,8 +78,8 @@ const roleLabels: Record<RoleSlug, string> = {
   worker: "Employe",
 };
 
-export function getRoleLabel(role: RoleSlug) {
-  return roleLabels[role];
+export function getRoleLabel(role: RoleSlug, locale: AppLocale = defaultLocale) {
+  return translate(locale, roleLabels[role]);
 }
 
 export function getRoleBadgeTone(role: RoleSlug) {
@@ -147,7 +149,7 @@ export function canAccessPath(context: UserContext, pathname: string) {
   return hasPermission(context, match.permission);
 }
 
-export const navigationItems = [
+const navigationSourceItems = [
   {
     href: "/dashboard",
     label: "Tableau de bord",
@@ -218,11 +220,26 @@ export const navigationItems = [
     label: "Parametres",
     description: "Configuration du magasin",
   },
-];
+] as const;
 
-export const mobileNavigationItems = [
+export function getNavigationItems(locale: AppLocale = defaultLocale) {
+  return navigationSourceItems.map((item) => ({
+    ...item,
+    label: translate(locale, item.label),
+    description: translate(locale, item.description),
+  }));
+}
+
+const mobileNavigationSourceItems = [
   { href: "/dashboard", label: "Accueil" },
   { href: "/recherche", label: "Recherche" },
   { href: "/ventes/nouvelle", label: "Vente" },
   { href: "/stock/nouvelle-entree", label: "Entree" },
-];
+] as const;
+
+export function getMobileNavigationItems(locale: AppLocale = defaultLocale) {
+  return mobileNavigationSourceItems.map((item) => ({
+    ...item,
+    label: translate(locale, item.label),
+  }));
+}
