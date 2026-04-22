@@ -236,15 +236,15 @@ export function SaleForm({
       <input type="hidden" name="tax_rate" value={String(defaultTaxRate)} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
-          <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4 text-sm leading-6 text-muted">
+        <div className="surface-card space-y-4 rounded-3xl border border-border p-5">
+          <div className="theme-soft rounded-3xl border border-border p-4 text-sm leading-6 text-muted">
             {t(
               "Choisissez d'abord le produit, puis la reference si ce produit en a plusieurs. Pour un produit simple, sa reference unique sera proposee automatiquement.",
             )}
           </div>
 
           {missingVariantCount > 0 ? (
-            <div className="rounded-3xl border border-accent/30 bg-[#fff6eb] p-4 text-sm leading-6 text-foreground">
+            <div className="theme-warning-soft rounded-3xl border border-accent/30 p-4 text-sm leading-6 text-foreground">
               {missingVariantCount} ligne{missingVariantCount > 1 ? "s" : ""} de cette vente pointe
               {missingVariantCount > 1 ? "nt" : ""} vers une reference inactive ou supprimee. Choisissez une nouvelle
               reference avant d&apos;enregistrer.
@@ -272,7 +272,7 @@ export function SaleForm({
             const lineQuantity = parseIntegerInput(line.quantity);
 
             return (
-              <div key={line.key} className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+              <div key={line.key} className="theme-soft rounded-3xl border border-border p-4">
                 <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(7rem,0.5fr)_minmax(8rem,0.7fr)_auto]">
                   <FormField label={`${t("Produit")} ${index + 1}`}>
                     <Select
@@ -406,8 +406,8 @@ export function SaleForm({
           })}
         </div>
 
-        <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
-          <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+        <div className="surface-card space-y-4 rounded-3xl border border-border p-5">
+          <div className="theme-soft rounded-3xl border border-border p-4">
             <div className="grid gap-4">
               <FormField
                 label={t("Type de client")}
@@ -467,7 +467,7 @@ export function SaleForm({
               value={resolvedCustomerName}
               readOnly={customerMode === "registered"}
               onChange={(event) => setManualCustomerName(event.target.value)}
-              className={customerMode === "registered" ? "bg-[#f4f6f8]" : undefined}
+              className={customerMode === "registered" ? "theme-field-muted" : undefined}
             />
           </FormField>
 
@@ -479,7 +479,7 @@ export function SaleForm({
               value={resolvedCustomerPhone}
               readOnly={customerMode === "registered"}
               onChange={(event) => setManualCustomerPhone(event.target.value)}
-              className={customerMode === "registered" ? "bg-[#f4f6f8]" : undefined}
+              className={customerMode === "registered" ? "theme-field-muted" : undefined}
             />
           </FormField>
 
@@ -505,7 +505,7 @@ export function SaleForm({
             <Input name="sold_at" type="datetime-local" defaultValue={toDateTimeLocalValue(sale?.sold_at)} />
           </FormField>
 
-          <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+          <div className="theme-soft rounded-3xl border border-border p-4">
             <label className="flex cursor-pointer items-start gap-3">
               <input
                 type="checkbox"
@@ -554,7 +554,7 @@ export function SaleForm({
                     value={resolvedCustomerIce}
                     readOnly={customerMode === "registered"}
                     onChange={(event) => setManualCustomerIce(event.target.value)}
-                    className={customerMode === "registered" ? "bg-[#f4f6f8]" : undefined}
+                    className={customerMode === "registered" ? "theme-field-muted" : undefined}
                   />
                 </FormField>
               </div>
@@ -565,7 +565,7 @@ export function SaleForm({
             <Textarea name="note" placeholder={t("Remarque interne ou client.")} defaultValue={sale?.note ?? ""} />
           </FormField>
 
-          <div className="rounded-3xl bg-[#f8f4ee] p-4">
+          <div className="theme-soft rounded-3xl p-4">
             <p className="text-sm text-muted">{documentLabel}</p>
             <div className="mt-4 space-y-3 text-sm">
               <div className="flex items-center justify-between gap-4">

@@ -37,7 +37,7 @@ export default async function ProductsPage({
         }
       />
 
-      <form className="rounded-3xl border border-border bg-white/70 p-4">
+      <form className="surface-card rounded-3xl border border-border p-4">
         <label className="grid gap-2">
           <span className="text-sm font-semibold text-foreground">{t("Recherche catalogue")}</span>
           <div className="flex gap-3">
@@ -45,7 +45,7 @@ export default async function ProductsPage({
               name="q"
               defaultValue={q}
               placeholder={t("Nom du produit ou description")}
-              className="min-h-11 flex-1 rounded-2xl border border-border bg-white/80 px-4 py-2.5 text-sm outline-none focus:border-brand"
+              className="theme-field min-h-11 flex-1 rounded-2xl border border-border px-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-brand"
             />
             <button
               type="submit"
@@ -73,9 +73,9 @@ export default async function ProductsPage({
               <Link
                 key={product.id}
                 href={`/produits/${product.id}`}
-                className="grid gap-4 rounded-[2rem] border border-border bg-white/70 p-4 transition hover:bg-white sm:grid-cols-[140px_1fr]"
+                className="surface-card grid gap-4 rounded-[2rem] border border-border p-4 transition hover:bg-[var(--surface-strong)] sm:grid-cols-[140px_1fr]"
               >
-                <div className="overflow-hidden rounded-3xl border border-border bg-[#f1eee9]">
+                <div className="theme-soft overflow-hidden rounded-3xl border border-border">
                   {imageUrl ? (
                     <RemoteImage
                       src={imageUrl}

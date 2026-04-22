@@ -91,7 +91,7 @@ export function StockEntryForm({
       <input type="hidden" name="supplier_id" value={supplierMode === "registered" ? selectedSupplierId : ""} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
+        <div className="surface-card space-y-4 rounded-3xl border border-border p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-display text-xl font-semibold">
@@ -109,11 +109,11 @@ export function StockEntryForm({
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand/80">{t("Lignes actives")}</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">{selectedLinesCount}</p>
             </div>
-            <div className="rounded-2xl border border-border bg-white px-4 py-3">
+            <div className="theme-elevated rounded-2xl border border-border px-4 py-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">{t("Quantite totale")}</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">{totalUnits}</p>
             </div>
-            <div className="rounded-2xl border border-border bg-white px-4 py-3">
+            <div className="theme-elevated rounded-2xl border border-border px-4 py-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
                 {mode === "in" ? t("Valeur estimee") : t("Mode actif")}
               </p>
@@ -132,7 +132,7 @@ export function StockEntryForm({
             return (
               <div
                 key={line.key}
-                className="overflow-hidden rounded-[2rem] border border-border/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(252,248,241,0.96))] p-5 shadow-[0_16px_34px_rgba(18,33,38,0.05)]"
+                className="theme-panel-gradient overflow-hidden rounded-[2rem] border border-border/80 p-5 shadow-[0_16px_34px_rgba(18,33,38,0.05)]"
               >
                 <div className="flex flex-col gap-3 border-b border-border/70 pb-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
@@ -170,7 +170,7 @@ export function StockEntryForm({
                   >
                     <Select
                       value={line.variant_id}
-                      className="bg-white"
+                      className="theme-field"
                       onChange={(event) => {
                         const nextVariant = variantMap[event.target.value];
                         setLines((current) =>
@@ -203,7 +203,7 @@ export function StockEntryForm({
                       type="number"
                       step={1}
                       inputMode="numeric"
-                      className="bg-white px-3"
+                      className="theme-field px-3"
                       value={line.quantity}
                       onChange={(event) =>
                         setLines((current) =>
@@ -242,7 +242,7 @@ export function StockEntryForm({
                       step="0.01"
                       disabled={mode !== "in"}
                       inputMode="decimal"
-                      className="bg-white px-3"
+                      className="theme-field px-3"
                       value={line.purchase_price}
                       onChange={(event) =>
                         setLines((current) =>
@@ -270,21 +270,21 @@ export function StockEntryForm({
 
                 {selectedVariant ? (
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
+                    <div className="theme-elevated rounded-2xl border border-border px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">{t("Reference")}</p>
                       <p className="mt-2 text-sm font-semibold text-foreground">{selectedVariant.reference}</p>
                     </div>
-                    <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
+                    <div className="theme-elevated rounded-2xl border border-border px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">{t("Details")}</p>
                       <p className="mt-2 text-sm font-semibold text-foreground">
                         {detailLabel === "Variant simple" ? t("Article simple") : detailLabel}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
+                    <div className="theme-elevated rounded-2xl border border-border px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">{t("Stock actuel")}</p>
                       <p className="mt-2 text-sm font-semibold text-foreground">{selectedVariant.quantity_in_stock}</p>
                     </div>
-                    <div className="rounded-2xl border border-border bg-white px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
+                    <div className="theme-elevated rounded-2xl border border-border px-4 py-3 shadow-[0_8px_18px_rgba(18,33,38,0.03)]">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
                         {mode === "in" ? t("Valeur ligne") : t("Dernier achat")}
                       </p>
@@ -303,7 +303,7 @@ export function StockEntryForm({
           })}
         </div>
 
-        <div className="space-y-4 rounded-3xl border border-border bg-white/70 p-5">
+        <div className="surface-card space-y-4 rounded-3xl border border-border p-5">
           <FormField label={t("Type d'operation")}>
             <Select
               name="mode"
@@ -315,7 +315,7 @@ export function StockEntryForm({
             </Select>
           </FormField>
 
-          <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+          <div className="theme-soft rounded-3xl border border-border p-4">
             <div className="grid gap-4">
               <FormField
                 label={t("Type de fournisseur")}
@@ -375,12 +375,12 @@ export function StockEntryForm({
               value={resolvedSupplierName}
               readOnly={supplierMode === "registered"}
               onChange={(event) => setManualSupplierName(event.target.value)}
-              className={supplierMode === "registered" ? "bg-[#f4f6f8]" : undefined}
+              className={supplierMode === "registered" ? "theme-field-muted" : undefined}
             />
           </FormField>
 
           {supplierMode === "registered" && selectedSupplier ? (
-            <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4 text-sm leading-6 text-muted">
+            <div className="theme-soft rounded-3xl border border-border p-4 text-sm leading-6 text-muted">
               <p className="font-semibold text-foreground">{selectedSupplier.name}</p>
               {selectedSupplier.contact_name ? <p>{t("Contact")}: {selectedSupplier.contact_name}</p> : null}
               {selectedSupplier.phone ? <p>{t("Tel")}: {selectedSupplier.phone}</p> : null}

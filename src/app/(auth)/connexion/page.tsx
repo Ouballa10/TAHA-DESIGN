@@ -1,5 +1,6 @@
 import { LoginForm } from "@/components/forms/login-form";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ThemeSwitcher } from "@/components/layout/theme-switcher";
 import { SHOP_NAME } from "@/lib/config";
 import { getServerI18n } from "@/lib/i18n/server";
 
@@ -16,7 +17,10 @@ export default async function LoginPage({
       <section className="flex flex-col justify-between px-6 py-8 sm:px-10 lg:px-14 lg:py-14">
         <div className="max-w-xl">
           <div className="flex items-center justify-end">
-            <LanguageSwitcher />
+            <div className="flex flex-wrap items-center gap-2">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
           </div>
           <div className="inline-flex rounded-full border border-brand/20 bg-brand/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.26em] text-brand">
             {t("Gestion magasin")}

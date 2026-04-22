@@ -4,11 +4,14 @@ import { Cairo, Manrope, Space_Grotesk } from "next/font/google";
 
 import "@/app/globals.css";
 import { LocaleProvider } from "@/components/providers/locale-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { ToasterProvider } from "@/components/ui/toaster-provider";
 import { SHOP_NAME } from "@/lib/config";
 import { getPublicShopSettings } from "@/lib/data/users";
 import { getServerI18n, getServerLocale } from "@/lib/i18n/server";
+import { getThemeClass } from "@/lib/theme/config";
+import { getServerTheme } from "@/lib/theme/server";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -100,18 +103,21 @@ async function RootLayoutContent({
 }>) {
   const { dir } = await getServerI18n();
   const locale = await getServerLocale();
+  const theme = await getServerTheme();
 
   return (
     <html
       lang={locale}
       dir={dir}
-      className={`${manrope.variable} ${spaceGrotesk.variable} ${cairo.variable} ${locale === "ar" ? "locale-ar" : ""}`}
+      className={`${manrope.variable} ${spaceGrotesk.variable} ${cairo.variable} ${locale === "ar" ? "locale-ar" : ""} ${getThemeClass(theme)}`}
     >
       <body>
         <LocaleProvider locale={locale}>
-          {children}
-          <PwaRegister />
-          <ToasterProvider />
+          <ThemeProvider theme={theme}>
+            {children}
+            <PwaRegister />
+            <ToasterProvider />
+          </ThemeProvider>
         </LocaleProvider>
       </body>
     </html>

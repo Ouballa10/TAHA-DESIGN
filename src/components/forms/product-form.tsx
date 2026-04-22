@@ -30,7 +30,7 @@ export function ProductForm({
 
   return (
     <form action={formAction} className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-      <div className="space-y-5 rounded-3xl border border-border bg-white/70 p-5">
+      <div className="surface-card space-y-5 rounded-3xl border border-border p-5">
         <input type="hidden" name="id" defaultValue={product?.id} />
         <input type="hidden" name="existing_main_photo_path" defaultValue={product?.main_photo_path ?? ""} />
 
@@ -57,7 +57,7 @@ export function ProductForm({
           />
         </FormField>
 
-        <label className="flex items-center gap-3 rounded-2xl border border-border bg-white/80 px-4 py-3 text-sm font-medium text-foreground">
+        <label className="theme-field flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-medium text-foreground">
           <input type="checkbox" name="is_active" defaultChecked={product?.is_active ?? true} className="size-4" />
           {t("Produit actif")}
         </label>
@@ -69,13 +69,13 @@ export function ProductForm({
         <SubmitButton>{product ? t("Mettre a jour le produit") : t("Creer le produit")}</SubmitButton>
       </div>
 
-      <div className="space-y-5 rounded-3xl border border-border bg-white/70 p-5">
+      <div className="surface-card space-y-5 rounded-3xl border border-border p-5">
         <FormField label={t("Photo principale")} hint={t("Format JPG, PNG ou WebP.")}>
           <Input name="main_photo" type="file" accept="image/*" />
         </FormField>
 
         {imageUrl ? (
-          <div className="overflow-hidden rounded-3xl border border-border bg-[#f1eee9]">
+          <div className="theme-soft overflow-hidden rounded-3xl border border-border">
             <RemoteImage
               src={imageUrl}
               alt={product?.name ?? t("Photo produit")}

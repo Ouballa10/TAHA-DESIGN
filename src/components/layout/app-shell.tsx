@@ -26,7 +26,7 @@ export function AppShell({
     <div className="app-grid">
       <Sidebar context={context} shopName={shopName} lowStockAlertCount={lowStockAlertCount} />
       <div className="flex min-h-screen flex-col pb-6 lg:pb-0">
-        <header className="print-hidden sticky top-0 z-20 border-b border-border bg-[#f7f2eb]/90 backdrop-blur lg:hidden">
+        <header className="theme-shell print-hidden sticky top-0 z-20 border-b border-border backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <div className="flex min-w-0 items-center gap-3">
               <MobileNav context={context} shopName={shopName} lowStockAlertCount={lowStockAlertCount} />
@@ -38,7 +38,7 @@ export function AppShell({
             <div className="flex items-center gap-2">
               <Link
                 href="/recherche"
-                className="rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-foreground"
+                className="theme-elevated rounded-2xl px-3 py-2 text-xs font-semibold text-foreground"
               >
                 {t("Recherche")}
               </Link>

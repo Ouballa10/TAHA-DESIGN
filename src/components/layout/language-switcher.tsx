@@ -24,7 +24,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-border bg-white/85 p-1 shadow-sm",
+        "inline-flex items-center gap-1 rounded-full border border-border bg-[var(--surface-strong)] p-1 shadow-sm",
         className,
       )}
       aria-label={t("Changer la langue")}
@@ -51,7 +51,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
             }}
             className={cn(
               "inline-flex min-h-9 min-w-11 items-center justify-center rounded-full px-3 text-xs font-semibold transition",
-              active ? "bg-foreground text-white" : "text-foreground hover:bg-[#f3eee6]",
+              active ? "bg-foreground text-[var(--surface-strong)]" : "text-foreground hover:bg-[var(--surface-hover)]",
             )}
           >
             {getLocaleButtonLabel(option)}

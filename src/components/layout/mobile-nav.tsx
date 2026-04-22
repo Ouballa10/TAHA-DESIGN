@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ThemeSwitcher } from "@/components/layout/theme-switcher";
 import { useI18n } from "@/components/providers/locale-provider";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { canAccessPath, getNavigationItems, getRoleLabel } from "@/lib/auth/permissions";
@@ -92,7 +93,7 @@ export function MobileNav({
       <aside
         id="mobile-navigation"
         className={cn(
-          "relative flex h-dvh w-full flex-col overflow-hidden bg-[#f7f2eb] px-5 pb-5 pt-[max(1rem,env(safe-area-inset-top))] shadow-[0_24px_60px_rgba(12,30,37,0.18)] transition duration-200",
+          "theme-shell-solid relative flex h-dvh w-full flex-col overflow-hidden px-5 pb-5 pt-[max(1rem,env(safe-area-inset-top))] shadow-[0_24px_60px_rgba(12,30,37,0.18)] transition duration-200",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -105,7 +106,7 @@ export function MobileNav({
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border bg-white px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-[#f4eee6]"
+            className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
           >
             {t("Fermer")}
           </button>
@@ -123,8 +124,8 @@ export function MobileNav({
                 className={cn(
                   "rounded-3xl px-3 py-4 transition",
                   isActivePath(pathname, item.href)
-                    ? "bg-white/90 text-foreground shadow-sm"
-                    : "text-foreground hover:bg-white/55",
+                    ? "bg-[var(--surface-strong)] text-foreground shadow-sm"
+                    : "text-foreground hover:bg-[var(--surface-hover)]",
                   hasLowStockAlert && "ring-1 ring-danger/10",
                 )}
               >
@@ -147,7 +148,10 @@ export function MobileNav({
         <div className="border-t border-border/70 pt-4 pb-[max(0rem,env(safe-area-inset-bottom))]">
           <p className="text-sm font-semibold">{profile.full_name || profile.email}</p>
           <p className="mt-1 text-sm text-muted">{profile.email}</p>
-          <LanguageSwitcher className="mt-4" />
+          <div className="mt-4 flex flex-wrap gap-2">
+            <LanguageSwitcher />
+            <ThemeSwitcher />
+          </div>
           <form action={logoutAction} className="mt-4">
             <button
               type="submit"
@@ -169,7 +173,7 @@ export function MobileNav({
         aria-expanded={isOpen}
         aria-label={t("Ouvrir le menu")}
         onClick={() => setIsOpen(true)}
-        className="relative inline-flex size-11 items-center justify-center rounded-2xl border border-border bg-white/90 text-foreground shadow-sm transition hover:bg-white lg:hidden"
+        className="theme-elevated relative inline-flex size-11 items-center justify-center rounded-2xl border border-border text-foreground shadow-sm transition hover:bg-[var(--surface-hover)] lg:hidden"
       >
         {hasPendingLowStockAlert ? (
           <>

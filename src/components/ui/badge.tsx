@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 const toneClasses = {
-  neutral: "bg-white/80 text-foreground",
+  neutral: "bg-[var(--surface-strong)] text-foreground",
   success: "bg-success/12 text-success",
   warning: "bg-accent/16 text-accent",
   danger: "bg-danger/14 text-danger",

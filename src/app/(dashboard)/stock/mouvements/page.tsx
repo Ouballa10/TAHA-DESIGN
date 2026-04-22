@@ -33,7 +33,7 @@ export default async function StockMovementsPage() {
             />
           ) : (
             movements.map((movement) => (
-              <div key={movement.id} className="rounded-[1.75rem] border border-border bg-[#f8f4ee] p-4">
+              <div key={movement.id} className="theme-soft rounded-[1.75rem] border border-border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold text-foreground">

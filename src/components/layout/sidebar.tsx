@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ThemeSwitcher } from "@/components/layout/theme-switcher";
 import { Badge } from "@/components/ui/badge";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import { canAccessPath, getNavigationItems, getRoleBadgeTone, getRoleLabel } from "@/lib/auth/permissions";
@@ -32,7 +33,7 @@ export function Sidebar({
   const navigationItems = getNavigationItems(locale);
 
   return (
-    <aside className="print-hidden hidden border-r border-border bg-[#f7f2eb]/70 px-6 py-8 lg:flex lg:flex-col">
+    <aside className="theme-shell print-hidden hidden border-r border-border px-6 py-8 lg:flex lg:flex-col">
       <div className="surface-card rounded-3xl border border-border p-5">
         <p className="font-display text-xl font-semibold">{shopName}</p>
         <p className="mt-1 text-sm text-muted">{t("Gestion stock, ventes et achats")}</p>
@@ -75,7 +76,10 @@ export function Sidebar({
       <div className="surface-card rounded-3xl border border-border p-5">
         <p className="text-sm font-semibold">{profile.full_name || profile.email}</p>
         <p className="mt-1 text-xs text-muted">{profile.email}</p>
-        <LanguageSwitcher className="mt-4" />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <LanguageSwitcher />
+          <ThemeSwitcher />
+        </div>
         <form action={logoutAction} className="mt-4">
           <button
             type="submit"

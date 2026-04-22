@@ -34,7 +34,7 @@ export default async function LowStockPage() {
       ) : (
         <div className="grid gap-4 xl:grid-cols-2">
           {variants.map((variant) => (
-            <div key={variant.variant_id} className="rounded-[2rem] border border-border bg-white/70 p-5">
+            <div key={variant.variant_id} className="surface-card rounded-[2rem] border border-border p-5">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-display text-xl font-semibold text-foreground">{variant.product_name}</h2>
                 <Badge tone="danger">{t("Stock bas")}</Badge>

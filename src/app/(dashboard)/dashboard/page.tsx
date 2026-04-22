@@ -31,14 +31,14 @@ export default async function DashboardPage() {
             {context.permissions.viewReports ? (
               <Link
                 href={salesReportsPath()}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-white/80"
+                className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
               >
                 {t("Statistiques ventes")}
               </Link>
             ) : null}
             <Link
               href="/recherche"
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-white/80"
+              className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
             >
               {t("Recherche rapide")}
             </Link>
@@ -70,13 +70,13 @@ export default async function DashboardPage() {
             <CardDescription>{t("Resume simple pour la journee et les 7 derniers jours.")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl bg-[#f8f4ee] p-5">
+            <div className="theme-soft rounded-3xl p-5">
               <p className="text-sm text-muted">{t("Aujourd'hui")}</p>
               <p className="mt-2 font-display text-3xl font-semibold text-foreground">
                 {formatCurrency(data.todaysSalesAmount)}
               </p>
             </div>
-            <div className="rounded-3xl bg-[#eef5f4] p-5">
+            <div className="theme-soft-alt rounded-3xl p-5">
               <p className="text-sm text-muted">{t("7 derniers jours")}</p>
               <p className="mt-2 font-display text-3xl font-semibold text-foreground">
                 {formatCurrency(data.weekSalesAmount)}
@@ -95,14 +95,14 @@ export default async function DashboardPage() {
               {t("Enregistrer une vente")}
             </Link>
             {context.permissions.createStockEntry ? (
-              <Link href="/stock/nouvelle-entree" className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-foreground">
+              <Link href="/stock/nouvelle-entree" className="theme-elevated rounded-2xl px-4 py-3 text-sm font-semibold text-foreground">
                 {t("Ajouter une entree")}
               </Link>
             ) : null}
-            <Link href="/stock/alertes" className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-foreground">
+            <Link href="/stock/alertes" className="theme-elevated rounded-2xl px-4 py-3 text-sm font-semibold text-foreground">
               {t("Voir les alertes stock")}
             </Link>
-            <Link href="/produits" className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-foreground">
+            <Link href="/produits" className="theme-elevated rounded-2xl px-4 py-3 text-sm font-semibold text-foreground">
               {t("Ouvrir le catalogue")}
             </Link>
           </CardContent>
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
                 <Link
                   key={sale.id}
                   href={`/ventes/${sale.id}`}
-                  className="flex flex-col gap-3 rounded-3xl border border-border bg-[#f8f4ee] p-4 transition hover:bg-white"
+                  className="theme-soft flex flex-col gap-3 rounded-3xl border border-border p-4 transition hover:bg-[var(--surface-strong)]"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
@@ -164,7 +164,7 @@ export default async function DashboardPage() {
               />
             ) : (
               data.recentEntries.map((entry) => (
-                <div key={entry.id} className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+                <div key={entry.id} className="theme-soft rounded-3xl border border-border p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="font-semibold text-foreground">{entry.supplier_name_snapshot || t("Sans fournisseur")}</p>
