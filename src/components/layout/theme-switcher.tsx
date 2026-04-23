@@ -33,7 +33,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-border bg-[var(--surface-strong)] p-1 shadow-sm",
+        "theme-toggle-track inline-flex items-center gap-1 rounded-full border border-border p-1 shadow-sm",
         className,
       )}
       aria-label={t("Changer le theme")}
@@ -50,7 +50,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
             onClick={() => setTheme(option)}
             className={cn(
               "inline-flex min-h-9 min-w-11 items-center justify-center rounded-full px-3 text-xs font-semibold transition",
-              active ? "bg-foreground text-[var(--surface-strong)]" : "text-foreground hover:bg-[var(--surface-hover)]",
+              active ? "theme-toggle-active shadow-sm" : "text-muted hover:bg-[var(--surface-hover)] hover:text-foreground",
             )}
           >
             <ThemeIcon theme={option} />

@@ -33,7 +33,7 @@ export default async function AdminUserDetailsPage({
         actions={
           <Link
             href={adminUsersPath()}
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+            className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
           >
             Retour a la liste
           </Link>

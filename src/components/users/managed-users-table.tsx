@@ -21,7 +21,7 @@ function summarizePermissions(user: ManagedUser) {
 
 export function ManagedUsersTable({ users }: { users: ManagedUser[] }) {
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-border bg-white/70">
+    <div className="theme-shell overflow-hidden rounded-[2rem] border border-border">
       <div className="hidden grid-cols-[minmax(0,1.3fr)_0.9fr_0.9fr_1fr_auto] gap-4 border-b border-border px-5 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted md:grid">
         <span>Employe</span>
         <span>Role</span>
@@ -68,7 +68,7 @@ export function ManagedUsersTable({ users }: { users: ManagedUser[] }) {
             <div className="md:text-right">
               <Link
                 href={adminUserDetailsPath(user.id)}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[#f8f4ee]"
+                className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
               >
                 Gerer
               </Link>

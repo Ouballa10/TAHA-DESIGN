@@ -22,6 +22,9 @@
   --surface-hover: #f3eee6;
   --field-bg: rgba(255, 255, 255, 0.84);
   --field-muted: #f4f6f8;
+  --toggle-track: rgba(245, 247, 249, 0.96);
+  --toggle-active: #182126;
+  --toggle-active-fg: #f7fafb;
   --panel-gradient:
     linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(252, 248, 241, 0.96));
   --warning-soft: #fff6eb;
@@ -49,6 +52,9 @@ html.theme-dark {
   --surface-hover: #223139;
   --field-bg: rgba(19, 30, 35, 0.92);
   --field-muted: #202c33;
+  --toggle-track: rgba(16, 24, 29, 0.96);
+  --toggle-active: #e6edf0;
+  --toggle-active-fg: #142026;
   --panel-gradient:
     linear-gradient(180deg, rgba(22, 33, 39, 0.96), rgba(18, 28, 33, 0.98));
   --warning-soft: rgba(227, 156, 83, 0.16);
@@ -150,6 +156,15 @@ textarea {
 
 .theme-field-muted {
   background: var(--field-muted);
+}
+
+.theme-toggle-track {
+  background: var(--toggle-track);
+}
+
+.theme-toggle-active {
+  background: var(--toggle-active);
+  color: var(--toggle-active-fg);
 }
 
 .theme-elevated {

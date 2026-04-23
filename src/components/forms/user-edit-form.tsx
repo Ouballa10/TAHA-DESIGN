@@ -17,7 +17,7 @@ export function UserEditForm({ user }: { user: ManagedUser }) {
   const showAdminOption = user.role === "admin";
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-3xl border border-border bg-white/70 p-5">
+    <form action={formAction} className="surface-card grid gap-4 rounded-3xl border border-border p-5">
       <input type="hidden" name="id" value={user.id} />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <FormField label="Nom">
@@ -27,7 +27,7 @@ export function UserEditForm({ user }: { user: ManagedUser }) {
           <Input name="phone" defaultValue={user.phone ?? ""} />
         </FormField>
         <FormField label="Email">
-          <Input value={user.email} readOnly className="bg-[#f4efe7]" />
+          <Input value={user.email} readOnly className="theme-field-muted" />
         </FormField>
         <FormField label="Role">
           <Select name="role" defaultValue={user.role}>
@@ -38,12 +38,12 @@ export function UserEditForm({ user }: { user: ManagedUser }) {
         </FormField>
       </div>
 
-      <label className="flex items-center gap-3 rounded-2xl border border-border bg-[#f8f4ee] px-4 py-3 text-sm font-medium text-foreground">
+      <label className="theme-soft flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-medium text-foreground">
         <input type="checkbox" name="is_active" defaultChecked={user.is_active} className="size-4" />
         Compte actif
       </label>
 
-      <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+      <div className="theme-soft rounded-3xl border border-border p-4">
         <p className="text-sm font-semibold text-foreground">Permissions operationnelles</p>
         <p className="mt-1 text-sm leading-6 text-muted">
           Les variantes sont le stock vendable reel. Donnez les droits ci-dessous uniquement si cet employe doit

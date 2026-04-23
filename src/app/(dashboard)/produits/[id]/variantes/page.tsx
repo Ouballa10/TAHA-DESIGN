@@ -35,7 +35,7 @@ export default async function VariantsManagementPage({
           <>
             <Link
               href={productDetailsPath(product.id)}
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+              className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
             >
               Retour produit
             </Link>
@@ -85,15 +85,15 @@ export default async function VariantsManagementPage({
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-3xl bg-[#f8f4ee] p-4">
+                  <div className="theme-soft rounded-3xl p-4">
                     <p className="text-xs text-muted">Vente</p>
                     <p className="mt-2 font-semibold text-foreground">{formatCurrency(variant.selling_price)}</p>
                   </div>
-                  <div className="rounded-3xl bg-[#f8f4ee] p-4">
+                  <div className="theme-soft rounded-3xl p-4">
                     <p className="text-xs text-muted">Achat</p>
                     <p className="mt-2 font-semibold text-foreground">{formatCurrency(variant.purchase_price)}</p>
                   </div>
-                  <div className="rounded-3xl bg-[#f8f4ee] p-4">
+                  <div className="theme-soft rounded-3xl p-4">
                     <p className="text-xs text-muted">Seuil minimum</p>
                     <p className="mt-2 font-semibold text-foreground">{variant.minimum_stock}</p>
                   </div>
@@ -102,7 +102,7 @@ export default async function VariantsManagementPage({
                 <div className="flex flex-wrap gap-3">
                   <Link
                     href={editVariantPath(product.id, variant.id)}
-                    className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+                    className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
                   >
                     Modifier
                   </Link>

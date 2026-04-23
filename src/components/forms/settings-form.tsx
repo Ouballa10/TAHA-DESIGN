@@ -39,7 +39,7 @@ function SettingsIcon({
 }) {
   const colorClass =
     tone === "success"
-      ? "text-[#0b9f6a]"
+      ? "text-success"
       : tone === "neutral"
         ? "text-muted"
         : tone === "light"
@@ -132,14 +132,14 @@ function SectionNavButton({
       className={cn(
         "flex w-full items-center gap-4 rounded-[1.75rem] border px-4 py-4 text-left transition",
         active
-          ? "border-[#a8efd5] bg-[#eafff6] shadow-[0_12px_30px_rgba(12,159,106,0.12)]"
-          : "border-transparent bg-white/70 hover:border-border hover:bg-white",
+          ? "border-success/30 bg-success/12 shadow-[0_12px_30px_rgba(12,159,106,0.12)]"
+          : "theme-elevated border-transparent hover:border-border hover:bg-[var(--surface-hover)]",
       )}
     >
       <div
         className={cn(
           "flex size-12 shrink-0 items-center justify-center rounded-2xl",
-          active ? "bg-[#d7fff0]" : "bg-[#f6f7f8]",
+          active ? "bg-success/15" : "theme-soft-alt",
         )}
       >
         <SettingsIcon name={icon} tone={active ? "success" : "neutral"} />
@@ -166,9 +166,9 @@ function SettingsPanel({
   children: ReactNode;
 }) {
   return (
-    <section className={cn("rounded-[2rem] border border-border bg-white px-5 py-5 shadow-[0_18px_44px_rgba(18,33,38,0.05)] sm:px-7 sm:py-6", !active && "hidden")}>
+    <section className={cn("surface-card rounded-[2rem] border border-border px-5 py-5 shadow-[0_18px_44px_rgba(18,33,38,0.05)] sm:px-7 sm:py-6", !active && "hidden")}>
       <div className="flex items-start gap-4 border-b border-border/80 pb-5">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-[#eff7ff]">
+        <div className="theme-soft-alt flex size-12 items-center justify-center rounded-2xl">
           <SettingsIcon name={icon} />
         </div>
         <div>
@@ -195,7 +195,7 @@ function ShortcutLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 rounded-2xl bg-[#0c8f61] px-4 py-3 text-white transition hover:bg-[#0a7a53]"
+      className="flex items-center gap-3 rounded-2xl bg-brand px-4 py-3 text-white transition hover:bg-brand-strong"
     >
         <div className="flex size-10 items-center justify-center rounded-2xl bg-white/12">
         <SettingsIcon name={icon} tone="light" />
@@ -259,7 +259,7 @@ export function SettingsForm({ settings }: { settings: ShopSettings | null }) {
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[24rem_minmax(0,1fr)]">
-        <aside className="space-y-5 rounded-[2rem] border border-border bg-white/80 p-5 shadow-[0_18px_44px_rgba(18,33,38,0.05)]">
+        <aside className="surface-card space-y-5 rounded-[2rem] border border-border p-5 shadow-[0_18px_44px_rgba(18,33,38,0.05)]">
           <div className="space-y-3">
             {sectionItems.map((section) => (
               <SectionNavButton
@@ -273,7 +273,7 @@ export function SettingsForm({ settings }: { settings: ShopSettings | null }) {
             ))}
           </div>
 
-          <div className="rounded-[1.75rem] bg-[#0b8c60] p-4 text-white shadow-[0_18px_36px_rgba(11,140,96,0.24)]">
+          <div className="rounded-[1.75rem] bg-brand p-4 text-white shadow-[0_18px_36px_rgba(11,140,96,0.24)]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Acces rapide</p>
             <div className="mt-4 space-y-3">
               <ShortcutLink href="/contacts?type=client" title="Clients" description="Meme page contacts" icon="users" />
@@ -403,25 +403,25 @@ export function SettingsForm({ settings }: { settings: ShopSettings | null }) {
                 </FormField>
               </div>
 
-              <div className="rounded-[1.75rem] border border-border bg-[#f8fbff] p-4">
+              <div className="theme-soft-alt rounded-[1.75rem] border border-border p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand">Apercu</p>
-                <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-border bg-white">
+                <div className="theme-elevated mt-4 overflow-hidden rounded-[1.5rem] border border-border">
                   {logoUrl ? (
                     <RemoteImage
                       src={logoUrl}
                       alt={shopNamePreview}
                       sizes="320px"
-                      className="aspect-[4/3] object-contain bg-white p-6"
+                      className="aspect-[4/3] object-contain bg-[var(--surface-strong)] p-6"
                     />
                   ) : (
-                    <div className="flex aspect-[4/3] items-center justify-center bg-[#f3efe8]">
+                    <div className="theme-soft flex aspect-[4/3] items-center justify-center">
                       <span className="font-display text-5xl font-semibold text-brand">{shopNamePreview.slice(0, 1)}</span>
                     </div>
                   )}
                 </div>
                 <p className="mt-4 font-display text-2xl font-semibold text-foreground">{shopNamePreview}</p>
                 <p className="mt-2 text-sm leading-6 text-muted">{taglinePreview}</p>
-                <div className="mt-4 rounded-2xl bg-white px-4 py-3 text-sm leading-6 text-muted">
+                <div className="theme-elevated mt-4 rounded-2xl px-4 py-3 text-sm leading-6 text-muted">
                   <p className="font-semibold text-brand">{seoTitle}</p>
                   <p className="mt-2">{seoDescription}</p>
                 </div>
@@ -476,7 +476,7 @@ export function SettingsForm({ settings }: { settings: ShopSettings | null }) {
             </div>
 
             <div className="mt-5 space-y-3">
-              <label className="flex items-start gap-3 rounded-[1.35rem] border border-border bg-[#f8fbff] px-4 py-3">
+              <label className="theme-soft-alt flex items-start gap-3 rounded-[1.35rem] border border-border px-4 py-3">
                 <input
                   type="checkbox"
                   name="show_tax_on_invoice"
@@ -494,7 +494,7 @@ export function SettingsForm({ settings }: { settings: ShopSettings | null }) {
                 </span>
               </label>
 
-              <label className="flex items-start gap-3 rounded-[1.35rem] border border-border bg-[#f8fbff] px-4 py-3">
+              <label className="theme-soft-alt flex items-start gap-3 rounded-[1.35rem] border border-border px-4 py-3">
                 <input
                   type="checkbox"
                   name="allow_worker_price_visibility"
@@ -512,7 +512,7 @@ export function SettingsForm({ settings }: { settings: ShopSettings | null }) {
               </label>
             </div>
 
-            <div className="mt-6 rounded-[1.75rem] border border-border bg-[#fffefd] p-4">
+            <div className="theme-soft mt-6 rounded-[1.75rem] border border-border p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Tableaux PDF</p>
@@ -523,7 +523,7 @@ export function SettingsForm({ settings }: { settings: ShopSettings | null }) {
 
               <div className="mt-5 grid gap-3 md:grid-cols-2">
                 {pdfColumns.map((column) => (
-                  <div key={column.label} className="flex items-center justify-between rounded-[1.35rem] border border-border bg-white px-4 py-4">
+                  <div key={column.label} className="theme-elevated flex items-center justify-between rounded-[1.35rem] border border-border px-4 py-4">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">Titre colonne</p>
                       <p className="mt-2 text-xl font-semibold text-foreground">{column.label}</p>
@@ -532,8 +532,8 @@ export function SettingsForm({ settings }: { settings: ShopSettings | null }) {
                       className={cn(
                         "rounded-full px-3 py-1 text-sm font-semibold",
                         column.status === "Affichee"
-                          ? "bg-[#e4fff4] text-[#0b9f6a]"
-                          : "bg-[#f1f2f3] text-muted",
+                          ? "bg-success/12 text-success"
+                          : "theme-field-muted text-muted",
                       )}
                     >
                       {column.status === "Affichee" ? "Affichee" : column.status}

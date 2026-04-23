@@ -34,14 +34,14 @@ export function UserCreateForm() {
           <option value="manager">Responsable</option>
         </Select>
       </FormField>
-      <div className="rounded-3xl border border-border bg-white/80 p-4 md:col-span-2">
+      <div className="theme-elevated rounded-3xl border border-border p-4 md:col-span-2">
         <p className="text-sm font-semibold text-foreground">Statut et droits terrain</p>
         <p className="mt-1 text-sm leading-6 text-muted">
           Cette page cree des comptes employes operatifs. Les comptes administrateurs existants restent visibles, mais
           la creation d&apos;un nouvel admin n&apos;est pas proposee ici.
         </p>
       </div>
-      <div className="grid gap-3 rounded-3xl border border-border bg-[#f8f4ee] p-4">
+      <div className="theme-soft grid gap-3 rounded-3xl border border-border p-4">
         <label className="flex items-center gap-3 text-sm font-medium text-foreground">
           <input type="checkbox" name="can_record_stock_entries" className="size-4" />
           Autoriser les entrees de stock
@@ -51,7 +51,7 @@ export function UserCreateForm() {
           Autoriser les corrections
         </label>
       </div>
-      <label className="flex items-center gap-3 rounded-3xl border border-border bg-[#f8f4ee] px-4 py-3 text-sm font-medium text-foreground">
+      <label className="theme-soft flex items-center gap-3 rounded-3xl border border-border px-4 py-3 text-sm font-medium text-foreground">
         <input type="checkbox" name="is_active" defaultChecked className="size-4" />
         Compte actif des la creation
       </label>

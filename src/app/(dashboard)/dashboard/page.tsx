@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { canViewPurchasePrices } from "@/lib/auth/price-visibility";
 import { requireUser } from "@/lib/auth/session";
 import { getDashboardData } from "@/lib/data/dashboard";
 import { getServerI18n } from "@/lib/i18n/server";
@@ -16,6 +17,7 @@ export default async function DashboardPage() {
   const { t } = await getServerI18n();
   const context = await requireUser();
   const data = await getDashboardData();
+  const showPurchasePrice = canViewPurchasePrices(context);
 
   return (
     <div className="space-y-5">
@@ -170,7 +172,7 @@ export default async function DashboardPage() {
                       <p className="font-semibold text-foreground">{entry.supplier_name_snapshot || t("Sans fournisseur")}</p>
                       <p className="text-sm text-muted">{entry.note || t("Aucune note")}</p>
                     </div>
-                    <Badge tone="brand">{formatCurrency(entry.total_cost)}</Badge>
+                    {showPurchasePrice ? <Badge tone="brand">{formatCurrency(entry.total_cost)}</Badge> : null}
                   </div>
                   <p className="mt-3 text-sm text-muted">{formatDateTime(entry.received_at)}</p>
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeSwitcher } from "@/components/layout/theme-switcher";
@@ -31,6 +32,7 @@ export function Sidebar({
   const { locale, t } = useI18n();
   const { profile } = context;
   const navigationItems = getNavigationItems(locale);
+  const pathname = usePathname();
 
   return (
     <aside className="theme-shell print-hidden hidden border-r border-border px-6 py-8 lg:flex lg:flex-col">
@@ -47,13 +49,20 @@ export function Sidebar({
           .filter((item) => canAccessPath(context, item.href))
           .map((item) => {
             const hasLowStockAlert = item.href === "/stock/alertes" && lowStockAlertCount > 0;
+            const isPrimarySaleAction = item.href === "/ventes/nouvelle";
+            const isActivePath =
+              item.href === "/dashboard" ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-2xl px-4 py-3 text-sm font-medium text-foreground transition hover:bg-white/70",
+                  "rounded-2xl px-4 py-3 text-sm font-medium transition",
+                  isPrimarySaleAction
+                    ? "bg-brand text-white shadow-[0_18px_34px_rgba(13,111,102,0.24)] hover:bg-brand-strong"
+                    : "text-foreground hover:bg-[var(--surface-hover)]",
+                  isActivePath && !isPrimarySaleAction && "theme-elevated shadow-sm",
                   hasLowStockAlert && "bg-danger/6 ring-1 ring-danger/10",
                 )}
               >
@@ -65,7 +74,12 @@ export function Sidebar({
                     </Badge>
                   ) : null}
                 </div>
-                <span className={cn("mt-1 block text-xs", hasLowStockAlert ? "text-danger" : "text-muted")}>
+                <span
+                  className={cn(
+                    "mt-1 block text-xs",
+                    isPrimarySaleAction ? "text-white/80" : hasLowStockAlert ? "text-danger" : "text-muted",
+                  )}
+                >
                   {hasLowStockAlert ? formatAlertDescription(lowStockAlertCount, t) : item.description}
                 </span>
               </Link>
@@ -83,7 +97,7 @@ export function Sidebar({
         <form action={logoutAction} className="mt-4">
           <button
             type="submit"
-            className="inline-flex w-full justify-center rounded-2xl bg-foreground px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            className="theme-elevated inline-flex w-full justify-center rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
           >
             {t("Se deconnecter")}
           </button>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { canViewPurchasePrices } from "@/lib/auth/price-visibility";
 import { requirePermission } from "@/lib/auth/session";
 import { getLowStockVariants } from "@/lib/data/catalog";
 import { getServerI18n } from "@/lib/i18n/server";
@@ -10,8 +11,9 @@ import { formatCurrency } from "@/lib/utils/format";
 
 export default async function LowStockPage() {
   const { t } = await getServerI18n();
-  await requirePermission("viewLowStock");
+  const context = await requirePermission("viewLowStock");
   const variants = await getLowStockVariants();
+  const showPurchasePrice = canViewPurchasePrices(context);
 
   return (
     <div className="space-y-5">
@@ -45,7 +47,7 @@ export default async function LowStockPage() {
                 {variant.color ? <Badge>{variant.color}</Badge> : null}
                 {variant.size ? <Badge>{variant.size}</Badge> : null}
               </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className={`mt-4 grid gap-3 ${showPurchasePrice ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
                 <div>
                   <p className="text-xs text-muted">{t("Stock actuel")}</p>
                   <p className="font-semibold text-foreground">{variant.quantity_in_stock}</p>
@@ -54,10 +56,12 @@ export default async function LowStockPage() {
                   <p className="text-xs text-muted">{t("Seuil")}</p>
                   <p className="font-semibold text-foreground">{variant.minimum_stock}</p>
                 </div>
-                <div>
-                  <p className="text-xs text-muted">{t("Prix achat")}</p>
-                  <p className="font-semibold text-foreground">{formatCurrency(variant.purchase_price)}</p>
-                </div>
+                {showPurchasePrice ? (
+                  <div>
+                    <p className="text-xs text-muted">{t("Prix achat")}</p>
+                    <p className="font-semibold text-foreground">{formatCurrency(variant.purchase_price)}</p>
+                  </div>
+                ) : null}
               </div>
             </div>
           ))}

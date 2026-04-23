@@ -30,13 +30,13 @@ export function VariantForm({
   const variantLabel = variant ? formatVariantLabel(variant) : "Variant simple";
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-3xl border border-border bg-white/70 p-5">
+    <form action={formAction} className="surface-card grid gap-4 rounded-3xl border border-border p-5">
       <input type="hidden" name="id" defaultValue={variant?.id} />
       <input type="hidden" name="product_id" value={productId} />
       <input type="hidden" name="existing_photo_path" defaultValue={variant?.photo_path ?? ""} />
       <input type="hidden" name="redirect_to" value={redirectTo ?? ""} />
 
-      <div className="rounded-3xl border border-border bg-[#f8f4ee] p-4">
+      <div className="theme-soft rounded-3xl border border-border p-4">
         <p className="text-sm font-semibold text-foreground">La reference du produit</p>
         <p className="mt-1 text-sm leading-6 text-muted">
           {productName ? `${productName} peut avoir une ou plusieurs references. ` : null}
@@ -113,13 +113,13 @@ export function VariantForm({
         <span className="text-sm text-muted">Libelle actuel: {variantLabel}</span>
       </div>
 
-      <label className="flex items-center gap-3 rounded-2xl border border-border bg-white/80 px-4 py-3 text-sm font-medium text-foreground">
+      <label className="theme-field flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-medium text-foreground">
         <input type="checkbox" name="is_active" defaultChecked={variant?.is_active ?? true} className="size-4" />
         Reference active
       </label>
 
       {imageUrl ? (
-        <div className="overflow-hidden rounded-3xl border border-border bg-[#f1eee9] md:max-w-xs">
+        <div className="theme-soft overflow-hidden rounded-3xl border border-border md:max-w-xs">
           <RemoteImage
             src={imageUrl}
             alt={variant?.reference ?? "Photo reference"}

@@ -103,7 +103,9 @@ function SegmentButton({
       disabled={disabled}
       className={cn(
         "flex-1 rounded-[1.5rem] border px-4 py-4 text-left transition disabled:cursor-not-allowed disabled:opacity-70",
-        active ? "border-[#8de8c8] bg-[#ebfff6] text-[#0b8c60]" : "border-border bg-white text-foreground hover:bg-[#f8fbff]",
+        active
+          ? "border-success/30 bg-success/12 text-success"
+          : "theme-elevated border-border text-foreground hover:bg-[var(--surface-hover)]",
       )}
     >
       <p className="text-base font-semibold">{label}</p>
@@ -129,10 +131,10 @@ function SummaryCard({
       onClick={onClick}
       className={cn(
         "rounded-[1.75rem] border p-5 text-left shadow-[0_14px_34px_rgba(18,33,38,0.04)] transition",
-        active ? "border-[#8de8c8] bg-[#ebfff6]" : "border-border bg-white hover:bg-[#f8fbff]",
+        active ? "border-success/30 bg-success/12" : "surface-card border-border hover:bg-[var(--surface-hover)]",
       )}
     >
-      <p className={cn("text-xs font-semibold uppercase tracking-[0.22em]", active ? "text-[#0b9f6a]" : "text-brand")}>
+      <p className={cn("text-xs font-semibold uppercase tracking-[0.22em]", active ? "text-success" : "text-brand")}>
         {label}
       </p>
       <p className="mt-3 font-display text-4xl font-semibold text-foreground">{value}</p>
@@ -170,13 +172,13 @@ function ContactCard({
   deleteAction: (formData: FormData) => void;
 }) {
   return (
-    <article className="rounded-[1.75rem] border border-border bg-white p-5 shadow-[0_14px_34px_rgba(18,33,38,0.04)]">
+    <article className="surface-card rounded-[1.75rem] border border-border p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xl font-semibold text-foreground">{title}</p>
           <p className="mt-1 text-sm text-muted">{subtitle}</p>
         </div>
-        <span className="rounded-full bg-[#e9fff5] px-3 py-1 text-xs font-semibold text-[#0b8c60]">{badge}</span>
+        <span className="rounded-full bg-success/12 px-3 py-1 text-xs font-semibold text-success">{badge}</span>
       </div>
 
       <div className="mt-4 space-y-2 text-sm leading-6 text-muted">
@@ -299,7 +301,7 @@ export function ContactsManager({
         />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-[1.75rem] border border-border bg-white p-4 shadow-[0_14px_34px_rgba(18,33,38,0.04)] lg:flex-row lg:items-center lg:justify-between">
+      <div className="surface-card flex flex-col gap-3 rounded-[1.75rem] border border-border p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="grid gap-3 sm:grid-cols-2 lg:w-[28rem]">
           <SegmentButton
             active={activeTab === "client"}
@@ -377,7 +379,7 @@ export function ContactsManager({
       {isOpen ? (
         <div className="fixed inset-0 z-40 overflow-y-auto bg-foreground/35 p-3 backdrop-blur-sm sm:p-4">
           <div className="flex min-h-full items-start justify-center py-3 sm:items-center sm:py-6">
-            <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_24px_60px_rgba(18,33,38,0.22)] sm:max-h-[calc(100dvh-3rem)]">
+            <div className="surface-card flex max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-border shadow-[0_24px_60px_rgba(18,33,38,0.22)] sm:max-h-[calc(100dvh-3rem)]">
               <div className="flex items-start justify-between gap-4 border-b border-border px-5 pb-5 pt-5 sm:px-6">
                 <div>
                   <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground">{modalTitle}</h2>
@@ -390,7 +392,7 @@ export function ContactsManager({
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-muted transition hover:bg-[#f8fbff]"
+                  className="theme-elevated rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-muted transition hover:bg-[var(--surface-hover)]"
                 >
                   Fermer
                 </button>
@@ -444,7 +446,7 @@ export function ContactsManager({
                     </div>
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-border bg-[#fbfcfd] p-4">
+                  <div className="theme-soft-alt rounded-[1.5rem] border border-border p-4">
                     <div className="grid gap-4">
                       <FormField label={nameLabel}>
                         <Input name="name" required placeholder={namePlaceholder} defaultValue={draft.name} />

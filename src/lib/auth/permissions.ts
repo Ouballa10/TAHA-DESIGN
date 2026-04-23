@@ -156,6 +156,21 @@ const navigationSourceItems = [
     description: "Vue d'ensemble et chiffres du jour",
   },
   {
+    href: "/ventes/nouvelle",
+    label: "Nouvelle vente",
+    description: "Saisie rapide depuis le telephone",
+  },
+  {
+    href: "/ventes",
+    label: "Historique ventes",
+    description: "Tickets, clients et paiements",
+  },
+  {
+    href: "/recherche",
+    label: "Recherche rapide",
+    description: "Reference, nom, categorie et couleur",
+  },
+  {
     href: "/contacts",
     label: "Clients & Fournisseurs",
     description: "Contacts commerciaux et fournisseurs",
@@ -166,14 +181,9 @@ const navigationSourceItems = [
     description: "Articles, references et photos",
   },
   {
-    href: "/recherche",
-    label: "Recherche rapide",
-    description: "Reference, nom, categorie et couleur",
-  },
-  {
-    href: "/ventes/nouvelle",
-    label: "Nouvelle vente",
-    description: "Saisie rapide depuis le telephone",
+    href: "/categories",
+    label: "Categories",
+    description: "Organisation du catalogue",
   },
   {
     href: "/stock/nouvelle-entree",
@@ -189,16 +199,6 @@ const navigationSourceItems = [
     href: "/stock/alertes",
     label: "Alertes stock",
     description: "Articles a reapprovisionner",
-  },
-  {
-    href: "/categories",
-    label: "Categories",
-    description: "Organisation du catalogue",
-  },
-  {
-    href: "/ventes",
-    label: "Historique ventes",
-    description: "Tickets, clients et paiements",
   },
   {
     href: salesReportsPath(),
@@ -232,8 +232,8 @@ export function getNavigationItems(locale: AppLocale = defaultLocale) {
 
 const mobileNavigationSourceItems = [
   { href: "/dashboard", label: "Accueil" },
-  { href: "/recherche", label: "Recherche" },
   { href: "/ventes/nouvelle", label: "Vente" },
+  { href: "/recherche", label: "Recherche" },
   { href: "/stock/nouvelle-entree", label: "Entree" },
 ] as const;
 

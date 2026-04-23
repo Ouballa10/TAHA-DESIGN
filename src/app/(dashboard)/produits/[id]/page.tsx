@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { canViewPurchasePrices } from "@/lib/auth/price-visibility";
 import { requireUser } from "@/lib/auth/session";
 import { getProductById } from "@/lib/data/catalog";
 import { formatCurrency, formatVariantLabel } from "@/lib/utils/format";
@@ -32,6 +33,7 @@ export default async function ProductDetailsPage({
   }
 
   const imageUrl = getPublicImageUrl(product.main_photo_path);
+  const showPurchasePrice = canViewPurchasePrices(context);
 
   return (
     <div className="space-y-5">
@@ -47,7 +49,7 @@ export default async function ProductDetailsPage({
             <>
               <Link
                 href={productEditPath(product.id)}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+                className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
               >
                 Modifier
               </Link>
@@ -59,7 +61,7 @@ export default async function ProductDetailsPage({
               </Link>
               <Link
                 href={productVariantsPath(product.id)}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+                className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
               >
                 Voir les references
               </Link>
@@ -74,7 +76,7 @@ export default async function ProductDetailsPage({
       <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <Card>
           <CardContent className="p-4">
-            <div className="overflow-hidden rounded-[1.75rem] border border-border bg-[#f1eee9]">
+            <div className="theme-soft overflow-hidden rounded-[1.75rem] border border-border">
               {imageUrl ? (
                 <RemoteImage
                   src={imageUrl}
@@ -96,16 +98,16 @@ export default async function ProductDetailsPage({
             <CardDescription>Resume utile pour le comptoir et la gestion du stock.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl bg-[#f8f4ee] p-4">
+            <div className="theme-soft rounded-3xl p-4">
               <p className="text-sm text-muted">Categorie</p>
               <p className="mt-2 font-semibold text-foreground">{product.category_name || "Sans categorie"}</p>
             </div>
-            <div className="rounded-3xl bg-[#f8f4ee] p-4">
+            <div className="theme-soft rounded-3xl p-4">
               <p className="text-sm text-muted">References</p>
               <p className="mt-2 font-semibold text-foreground">{product.variants.length}</p>
               <p className="mt-2 text-xs text-muted">Chaque reference correspond a une declinaison de ce produit.</p>
             </div>
-            <div className="rounded-3xl bg-[#f8f4ee] p-4 sm:col-span-2">
+            <div className="theme-soft rounded-3xl p-4 sm:col-span-2">
               <p className="text-sm text-muted">Description</p>
               <p className="mt-2 text-sm leading-6 text-foreground">{product.description || "Aucune description."}</p>
             </div>
@@ -116,7 +118,11 @@ export default async function ProductDetailsPage({
       <Card>
         <CardHeader>
           <CardTitle>References</CardTitle>
-          <CardDescription>References, details, prix et niveaux de stock pour ce produit.</CardDescription>
+          <CardDescription>
+            {showPurchasePrice
+              ? "References, details, prix et niveaux de stock pour ce produit."
+              : "References, details et niveaux de stock pour ce produit."}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {product.variants.length === 0 ? (
@@ -129,7 +135,7 @@ export default async function ProductDetailsPage({
           ) : (
             <div className="grid gap-4 xl:grid-cols-2">
               {product.variants.map((variant) => (
-                <div key={variant.id} className="rounded-[1.75rem] border border-border bg-[#f8f4ee] p-4">
+                <div key={variant.id} className="theme-soft rounded-[1.75rem] border border-border p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="space-y-2">
                       <h3 className="font-semibold text-foreground">{variant.reference}</h3>
@@ -144,15 +150,17 @@ export default async function ProductDetailsPage({
                     {variant.color ? <Badge>{variant.color}</Badge> : null}
                     {variant.size ? <Badge>{variant.size}</Badge> : null}
                   </div>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className={`mt-4 grid gap-3 ${showPurchasePrice ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
                     <div>
                       <p className="text-xs text-muted">Vente</p>
                       <p className="font-semibold text-foreground">{formatCurrency(variant.selling_price)}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted">Achat</p>
-                      <p className="font-semibold text-foreground">{formatCurrency(variant.purchase_price)}</p>
-                    </div>
+                    {showPurchasePrice ? (
+                      <div>
+                        <p className="text-xs text-muted">Achat</p>
+                        <p className="font-semibold text-foreground">{formatCurrency(variant.purchase_price)}</p>
+                      </div>
+                    ) : null}
                     <div>
                       <p className="text-xs text-muted">Seuil minimum</p>
                       <p className="font-semibold text-foreground">{variant.minimum_stock}</p>
@@ -162,7 +170,7 @@ export default async function ProductDetailsPage({
                     <div className="mt-4 flex justify-end">
                       <Link
                         href={editVariantPath(product.id, variant.id)}
-                        className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+                        className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
                       >
                         Modifier cette reference
                       </Link>

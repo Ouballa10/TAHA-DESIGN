@@ -1,8 +1,10 @@
 import { RemoteImage } from "@/components/ui/remote-image";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { LiveSearchForm } from "@/components/ui/live-search-form";
 import { PageHeader } from "@/components/ui/page-header";
 import { requirePermission } from "@/lib/auth/session";
+import { canViewPurchasePrices } from "@/lib/auth/price-visibility";
 import { getSearchResults } from "@/lib/data/catalog";
 import { formatCurrency } from "@/lib/utils/format";
 import { getPublicImageUrl } from "@/lib/utils/images";
@@ -12,9 +14,11 @@ export default async function SearchPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  await requirePermission("viewCatalog");
-  const { q = "" } = await searchParams;
+  const context = await requirePermission("viewCatalog");
+  const { q: rawQuery = "" } = await searchParams;
+  const q = rawQuery.trim();
   const results = q ? await getSearchResults(q) : [];
+  const showPurchasePrice = canViewPurchasePrices(context);
 
   return (
     <div className="space-y-5">
@@ -24,25 +28,7 @@ export default async function SearchPage({
         description="Entrez une reference, un nom, une categorie, une couleur ou un type pour savoir tout de suite si l'article est en stock."
       />
 
-      <form className="rounded-3xl border border-border bg-white/70 p-4">
-        <label className="grid gap-2">
-          <span className="text-sm font-semibold text-foreground">Recherche instantanee</span>
-          <div className="flex gap-3">
-            <input
-              name="q"
-              defaultValue={q}
-              placeholder="Ex: BDG-BL-3000, vis, blanc, bardage..."
-              className="min-h-12 flex-1 rounded-2xl border border-border bg-white/80 px-4 py-2.5 text-base outline-none focus:border-brand"
-            />
-            <button
-              type="submit"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-brand px-5 py-2.5 text-sm font-semibold text-white"
-            >
-              Chercher
-            </button>
-          </div>
-        </label>
-      </form>
+      <LiveSearchForm key={q} query={q} resultCount={results.length} />
 
       {!q ? (
         <EmptyState
@@ -60,8 +46,8 @@ export default async function SearchPage({
             const imageUrl = getPublicImageUrl(item.display_photo_path);
 
             return (
-              <div key={item.variant_id} className="grid gap-4 rounded-[2rem] border border-border bg-white/70 p-4 sm:grid-cols-[120px_1fr]">
-                <div className="overflow-hidden rounded-3xl border border-border bg-[#f1eee9]">
+              <div key={item.variant_id} className="surface-card grid gap-4 rounded-[2rem] border border-border p-4 sm:grid-cols-[120px_1fr]">
+                <div className="theme-soft overflow-hidden rounded-3xl border border-border">
                   {imageUrl ? (
                     <RemoteImage
                       src={imageUrl}
@@ -89,7 +75,7 @@ export default async function SearchPage({
                   </div>
                   <div className="flex flex-wrap gap-4 text-sm text-muted">
                     <span>Vente: {formatCurrency(item.selling_price)}</span>
-                    <span>Achat: {formatCurrency(item.purchase_price)}</span>
+                    {showPurchasePrice ? <span>Achat: {formatCurrency(item.purchase_price)}</span> : null}
                   </div>
                 </div>
               </div>

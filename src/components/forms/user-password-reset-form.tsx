@@ -14,7 +14,7 @@ export function UserPasswordResetForm({ userId }: { userId: string }) {
   useActionToast(state);
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-3xl border border-border bg-white/70 p-5">
+    <form action={formAction} className="surface-card grid gap-4 rounded-3xl border border-border p-5">
       <input type="hidden" name="id" value={userId} />
 
       <FormField

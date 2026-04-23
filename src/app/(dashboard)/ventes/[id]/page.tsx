@@ -36,14 +36,14 @@ export default async function SaleDetailsPage({
           href={`/api/sales/${sale.id}/pdf?mode=inline`}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-[#f7f4ee]"
+          className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-[var(--surface-hover)]"
         >
           Ouvrir PDF
         </a>
         {canManageSale ? (
           <Link
             href={saleEditPath(sale.id)}
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-[#f7f4ee]"
+            className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-[var(--surface-hover)]"
           >
             Modifier
           </Link>

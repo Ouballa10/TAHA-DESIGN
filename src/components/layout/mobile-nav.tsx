@@ -115,6 +115,7 @@ export function MobileNav({
         <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto py-6">
           {items.map((item) => {
             const hasLowStockAlert = item.href === "/stock/alertes" && hasPendingLowStockAlert;
+            const isPrimarySaleAction = item.href === "/ventes/nouvelle";
 
             return (
               <Link
@@ -123,9 +124,11 @@ export function MobileNav({
                 onClick={() => setIsOpen(false)}
                 className={cn(
                   "rounded-3xl px-3 py-4 transition",
-                  isActivePath(pathname, item.href)
-                    ? "bg-[var(--surface-strong)] text-foreground shadow-sm"
-                    : "text-foreground hover:bg-[var(--surface-hover)]",
+                  isPrimarySaleAction
+                    ? "bg-brand text-white shadow-[0_18px_34px_rgba(13,111,102,0.24)] hover:bg-brand-strong"
+                    : isActivePath(pathname, item.href)
+                      ? "bg-[var(--surface-strong)] text-foreground shadow-sm"
+                      : "text-foreground hover:bg-[var(--surface-hover)]",
                   hasLowStockAlert && "ring-1 ring-danger/10",
                 )}
               >
@@ -137,7 +140,12 @@ export function MobileNav({
                     </Badge>
                   ) : null}
                 </div>
-                <span className={cn("mt-1.5 block text-base leading-7", hasLowStockAlert ? "text-danger" : "text-muted")}>
+                <span
+                  className={cn(
+                    "mt-1.5 block text-base leading-7",
+                    isPrimarySaleAction ? "text-white/80" : hasLowStockAlert ? "text-danger" : "text-muted",
+                  )}
+                >
                   {hasLowStockAlert ? formatAlertDescription(lowStockAlertCount, t) : item.description}
                 </span>
               </Link>
@@ -155,7 +163,7 @@ export function MobileNav({
           <form action={logoutAction} className="mt-4">
             <button
               type="submit"
-              className="inline-flex w-full justify-center rounded-2xl bg-foreground px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              className="theme-elevated inline-flex w-full justify-center rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
             >
               {t("Se deconnecter")}
             </button>

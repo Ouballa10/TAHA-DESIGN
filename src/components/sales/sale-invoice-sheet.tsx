@@ -70,9 +70,9 @@ export function SaleInvoiceSheet({
   const footerNote = settings?.invoice_footer?.trim() || null;
 
   return (
-    <section className="print-sheet-root rounded-[2rem] border border-border bg-white p-5 shadow-[0_18px_40px_rgba(12,30,37,0.06)] sm:p-8 print:rounded-none print:border-0 print:p-0 print:shadow-none">
+    <section className="print-sheet-root theme-elevated rounded-[2rem] border border-border p-5 shadow-[0_18px_40px_rgba(12,30,37,0.06)] sm:p-8 print:rounded-none print:border-0 print:bg-white print:p-0 print:shadow-none">
       <div className="print-sheet-stack space-y-6">
-        <div className="print-sheet-block rounded-[2rem] border border-border bg-white px-5 py-5 sm:px-6">
+        <div className="print-sheet-block theme-elevated rounded-[2rem] border border-border px-5 py-5 print:bg-white sm:px-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.34em] text-brand">{documentLabel}</p>
@@ -85,15 +85,15 @@ export function SaleInvoiceSheet({
             </div>
 
             <div className="grid gap-3 text-sm sm:grid-cols-3 lg:min-w-[25rem]">
-              <div className="rounded-[1.25rem] bg-[#f8f4ee] px-4 py-3">
+              <div className="theme-soft rounded-[1.25rem] px-4 py-3 print:bg-[#f8f4ee]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Date</p>
                 <p className="mt-2 font-semibold text-foreground">{formatDate(sale.sold_at)}</p>
               </div>
-              <div className="rounded-[1.25rem] bg-[#f8f4ee] px-4 py-3">
+              <div className="theme-soft rounded-[1.25rem] px-4 py-3 print:bg-[#f8f4ee]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Reference</p>
                 <p className="mt-2 font-semibold text-foreground">{sale.sale_number}</p>
               </div>
-              <div className="rounded-[1.25rem] bg-[#f8f4ee] px-4 py-3">
+              <div className="theme-soft rounded-[1.25rem] px-4 py-3 print:bg-[#f8f4ee]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Operateur</p>
                 <p className="mt-2 font-semibold text-foreground">{sale.created_by_name || "Systeme"}</p>
               </div>
@@ -102,15 +102,15 @@ export function SaleInvoiceSheet({
         </div>
 
         <div className="print-sheet-grid grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
-          <div className="print-sheet-block rounded-[1.75rem] border border-border bg-white p-4 sm:p-5">
+          <div className="print-sheet-block theme-elevated rounded-[1.75rem] border border-border p-4 print:bg-white sm:p-5">
             <div className="flex items-start gap-4">
               {logoUrl ? (
-                <div className="w-20 shrink-0 overflow-hidden rounded-[1.35rem] border border-border bg-[#f7f4ee] sm:w-24">
+                <div className="theme-soft w-20 shrink-0 overflow-hidden rounded-[1.35rem] border border-border print:bg-[#f7f4ee] sm:w-24">
                   <RemoteImage
                     src={logoUrl}
                     alt={companyName}
                     sizes="96px"
-                    className="aspect-square object-contain bg-white p-2.5"
+                    className="aspect-square object-contain bg-[var(--surface-strong)] p-2.5 print:bg-white"
                   />
                 </div>
               ) : (
@@ -131,7 +131,7 @@ export function SaleInvoiceSheet({
             </div>
           </div>
 
-          <div className="print-sheet-block rounded-[1.75rem] border border-border bg-white p-4 sm:p-5">
+          <div className="print-sheet-block theme-elevated rounded-[1.75rem] border border-border p-4 print:bg-white sm:p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted">{isInvoice ? "Facturer a" : "Client"}</p>
             <p className="print-sheet-customer mt-3 font-display text-3xl font-semibold tracking-tight text-foreground">{customerName}</p>
             <div className="mt-4 space-y-2 text-sm leading-6 text-muted">
@@ -141,7 +141,7 @@ export function SaleInvoiceSheet({
           </div>
         </div>
 
-        <div className="print-sheet-block print-sheet-table overflow-hidden rounded-[1.75rem] border border-border bg-white">
+        <div className="print-sheet-block print-sheet-table theme-elevated overflow-hidden rounded-[1.75rem] border border-border print:bg-white">
           <table className="w-full border-collapse">
             <thead className="bg-brand text-left text-xs font-semibold uppercase tracking-[0.18em] text-white">
               <tr>
@@ -188,7 +188,7 @@ export function SaleInvoiceSheet({
         </div>
 
         <div className="print-sheet-grid-wide grid gap-4 lg:grid-cols-[1fr_24rem]">
-          <div className="print-sheet-block rounded-[1.75rem] border border-border bg-white p-4 sm:p-5">
+          <div className="print-sheet-block theme-elevated rounded-[1.75rem] border border-border p-4 print:bg-white sm:p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted">
               {isInvoice ? "Arrete la presente facture a la somme de :" : "Arrete le present bon de vente a la somme de :"}
             </p>
@@ -199,7 +199,7 @@ export function SaleInvoiceSheet({
             </div>
           </div>
 
-          <div className="print-sheet-block overflow-hidden rounded-[1.75rem] border border-border bg-white">
+          <div className="print-sheet-block theme-elevated overflow-hidden rounded-[1.75rem] border border-border print:bg-white">
             <div className="bg-brand px-5 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-white">Synthese</div>
             <div className="space-y-0 px-5 py-3">
               <div className="flex items-center justify-between gap-4 border-b border-border py-3">

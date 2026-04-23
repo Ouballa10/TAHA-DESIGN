@@ -30,7 +30,9 @@ function SupplierTypeButton({
       onClick={onClick}
       className={cn(
         "flex-1 rounded-2xl border px-4 py-4 text-left transition",
-        active ? "border-[#8de8c8] bg-[#ebfff6] text-[#0b8c60]" : "border-border bg-white text-foreground hover:bg-[#f8fbff]",
+        active
+          ? "border-success/30 bg-success/12 text-success"
+          : "theme-elevated border-border text-foreground hover:bg-[var(--surface-hover)]",
       )}
     >
       <p className="text-base font-semibold">{label}</p>
@@ -62,7 +64,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierDirectoryIt
         {suppliers.map((supplier) => (
           <article
             key={supplier.id}
-            className="rounded-[1.75rem] border border-border bg-white p-5 shadow-[0_14px_34px_rgba(18,33,38,0.04)]"
+            className="surface-card rounded-[1.75rem] border border-border p-5"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -71,7 +73,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierDirectoryIt
                   {supplier.supplier_type === "company" ? "Entreprise" : "Particulier"}
                 </p>
               </div>
-              <span className="rounded-full bg-[#e9fff5] px-3 py-1 text-xs font-semibold text-[#0b8c60]">
+              <span className="rounded-full bg-success/12 px-3 py-1 text-xs font-semibold text-success">
                 {supplier.supplier_type === "company" ? "Actif" : "Contact"}
               </span>
             </div>
@@ -94,7 +96,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierDirectoryIt
 
       {isOpen ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-foreground/35 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-3xl rounded-[2rem] border border-border bg-white p-6 shadow-[0_24px_60px_rgba(18,33,38,0.22)]">
+          <div className="surface-card w-full max-w-3xl rounded-[2rem] border border-border p-6 shadow-[0_24px_60px_rgba(18,33,38,0.22)]">
             <div className="flex items-start justify-between gap-4 border-b border-border pb-5">
               <div>
                 <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground">
@@ -105,7 +107,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierDirectoryIt
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-muted transition hover:bg-[#f8fbff]"
+                className="theme-elevated rounded-2xl border border-border px-4 py-2 text-sm font-semibold text-muted transition hover:bg-[var(--surface-hover)]"
               >
                 Fermer
               </button>
@@ -132,7 +134,7 @@ export function SuppliersManager({ suppliers }: { suppliers: SupplierDirectoryIt
                 </div>
               </div>
 
-              <div className="rounded-[1.5rem] border border-border bg-[#fbfcfd] p-4">
+              <div className="theme-soft-alt rounded-[1.5rem] border border-border p-4">
                 <div className="grid gap-4">
                   <FormField label={supplierType === "company" ? "Nom de la Societe" : "Nom complet"}>
                     <Input

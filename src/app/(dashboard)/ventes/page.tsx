@@ -31,7 +31,7 @@ export default async function SalesHistoryPage() {
             {context.permissions.viewReports ? (
               <Link
                 href={salesReportsPath()}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+                className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
               >
                 {t("Statistiques ventes")}
               </Link>
@@ -56,7 +56,11 @@ export default async function SalesHistoryPage() {
       ) : (
         <div className="space-y-3">
           {sales.map((sale) => (
-            <Link key={sale.id} href={`/ventes/${sale.id}`} className="block rounded-[2rem] border border-border bg-white/70 p-5 transition hover:bg-white">
+            <Link
+              key={sale.id}
+              href={`/ventes/${sale.id}`}
+              className="surface-card block rounded-[2rem] border border-border p-5 transition hover:bg-[var(--surface-hover)]"
+            >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-display text-xl font-semibold text-foreground">{sale.sale_number}</p>

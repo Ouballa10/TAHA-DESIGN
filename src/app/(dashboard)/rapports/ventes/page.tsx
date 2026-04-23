@@ -64,7 +64,7 @@ export default async function SalesReportsPage({
             <div className="flex items-end">
               <Link
                 href={exportHref}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-white/80 md:w-auto"
+                className="theme-elevated inline-flex min-h-11 w-full items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)] md:w-auto"
               >
                 Export Excel
               </Link>
@@ -131,7 +131,7 @@ export default async function SalesReportsPage({
               </CardHeader>
               <CardContent className="space-y-3">
                 {report.dailyBreakdown.map((day) => (
-                  <div key={day.label} className="rounded-3xl bg-[#f8f4ee] p-4">
+                  <div key={day.label} className="theme-soft rounded-3xl p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="font-semibold text-foreground">{formatDate(day.label)}</p>
@@ -155,7 +155,7 @@ export default async function SalesReportsPage({
                 </CardHeader>
                 <CardContent className="grid gap-3 sm:grid-cols-2">
                   {report.methodBreakdown.map((entry) => (
-                    <div key={entry.label} className="rounded-3xl bg-[#f8f4ee] p-4">
+                    <div key={entry.label} className="theme-soft rounded-3xl p-4">
                       <div className="flex items-center justify-between gap-3">
                         <Badge tone="brand">{formatPaymentMethod(entry.label)}</Badge>
                         <span className="text-xs text-muted">{entry.salesCount} vente{entry.salesCount > 1 ? "s" : ""}</span>
@@ -175,7 +175,7 @@ export default async function SalesReportsPage({
                 </CardHeader>
                 <CardContent className="grid gap-3 sm:grid-cols-2">
                   {report.statusBreakdown.map((entry) => (
-                    <div key={entry.label} className="rounded-3xl bg-[#f8f4ee] p-4">
+                    <div key={entry.label} className="theme-soft rounded-3xl p-4">
                       <div className="flex items-center justify-between gap-3">
                         <Badge tone={entry.label === "paid" ? "success" : entry.label === "partial" ? "brand" : "warning"}>
                           {formatPaymentStatus(entry.label)}
@@ -199,7 +199,7 @@ export default async function SalesReportsPage({
             </CardHeader>
             <CardContent className="space-y-3">
               {report.topProducts.map((product) => (
-                <div key={product.key} className="rounded-3xl bg-[#f8f4ee] p-4">
+                <div key={product.key} className="theme-soft rounded-3xl p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="font-semibold text-foreground">{product.productName}</p>

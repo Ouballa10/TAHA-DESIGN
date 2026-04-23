@@ -30,7 +30,7 @@ export default async function NewVariantPage({
         actions={
           <Link
             href={productVariantsPath(product.id)}
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-foreground"
+            className="theme-elevated inline-flex min-h-11 items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-[var(--surface-hover)]"
           >
             Retour aux references
           </Link>
